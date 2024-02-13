@@ -43,7 +43,7 @@ function Login(props) {
     try {
       
       const response=await axios.post("http://192.168.40.182:3000/login",userData)
-     // console.log("login success",response.data)
+      console.log("login success",response.data)
       props.navigation.navigate('BottomTab');
       // toast.success("login success")
      
