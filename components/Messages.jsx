@@ -12,8 +12,8 @@ const Messages = () => {
   return (
     <View style={styles.container}>
       <Image style={styles.backImg} source={require("../assets/tailorlogo.png")} />
-      <Text style={styles.ttext}>Find all your orders here</Text>
-      <Text style={styles.ptext}>Keep an eye out for your first order soon!</Text>
+      <Text style={styles.ttext}>Find all your Chats here</Text>
+      <Text style={styles.ptext}>Keep an eye out for your All Conversations!</Text>
       <TouchableOpacity onPress={navigateToHomeTab}>
         <Text style={styles.profileLink}>Go to Home</Text>
       </TouchableOpacity>

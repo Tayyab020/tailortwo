@@ -1,53 +1,61 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { View, Text, Image, StyleSheet } from 'react-native';
+import { FAB } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
   const navigation = useNavigation();
 
   const navigateToHomeTab = () => {
-    navigation.navigate('Home');
+    // Navigate to the desired tab
   };
 
   return (
     <View style={styles.container}>
       <Image style={styles.backImg} source={require("../assets/tailorlogo.png")} />
-      <Text style={styles.ttext}>Find all your orders here</Text>
-      <Text style={styles.ptext}>Keep an eye out for your first order soon!</Text>
-      <TouchableOpacity onPress={navigateToHomeTab}>
-        <Text style={styles.profileLink}>Go to Home</Text>
-      </TouchableOpacity>
+      <Text style={styles.ttext}>Find all your Gigs here</Text>
+      <Text style={styles.ptext}>Keep an eye out for your Gigs</Text>
+      <FAB
+        style={styles.fab}
+        icon="plus"
+        onPress={() => console.log('Pressed')}
+      />
     </View>
   );
 }
 
-export default Home;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20, 
+    padding: 20,
   },
   backImg: {
     width: 150,
-    height: 150, 
+    height: 150,
   },
   ttext: {
     color: '#FF8C00',
     fontWeight: 'bold',
-    marginTop: 10, 
+    marginTop: 10,
   },
   ptext: {
     color: 'black',
-    marginTop: 5, 
+    marginTop: 5,
   },
-  profileLink: {
-    marginTop: 15,
-    color: '#FF8C00',
+  fab: {
+    fab: {
+      position: 'absolute',
+      margin: 16,
+      right: 0,
+      bottom: 0,
+      color:"white",
+      placement:"right",
+      backgroundColor: '#FF8C00', // Customize button color
+    },
   
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
   },
 });
+
+export default Home;
