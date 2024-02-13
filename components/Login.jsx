@@ -49,7 +49,7 @@ function Login(props) {
      
     } catch (error) {
       console.log("login failed ",error.message)
-      navigation.navigate('Home');
+    
       // toast.error(error.message)
     }
     // finally{
@@ -97,7 +97,7 @@ function Login(props) {
   };
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, alignItems: 'center'}}>
+    <KeyboardAvoidingView style={{flex: 1, backgroundColor:'orange' ,alignItems: 'center'}}>
       <Image
         source={require('../assets/background.png')}
         style={styles.backgroundImage}
@@ -110,7 +110,7 @@ function Login(props) {
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
             <Icon
-              name="envelope"
+              name="user"
               size={20}
               color="#888"
               style={styles.inputIcon}
@@ -118,7 +118,7 @@ function Login(props) {
             <TextInput
              
               style={styles.input}
-              placeholder="Email"
+              placeholder="Username"
               placeholderTextColor="#888"
               color="black"
               onChangeText={text => setEmail(text)}
@@ -193,13 +193,14 @@ export default Login;
 
 const styles = StyleSheet.create({
   backgroundImage: {
-    opacity: 0.6,
+    opacity: 0.9,
     position: 'absolute',
     top: 100,
     resizeMode: 'cover',
   },
   container: {
     flex: 1,
+    backgroundColor: 'orange',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     fontSize: 27,
     alignSelf: 'center',
     fontWeight: 'bold',
-    color: 'white',
+    color: "#FF8C00",
     fontFamily: 'Poppins-Bold',
     marginBottom: 10,
     marginTop: 27,
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     transform: [{translateY: -10}],
   },
   button: {
-    backgroundColor: '#FF2D00',
+    backgroundColor: '#FF8C00',
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',

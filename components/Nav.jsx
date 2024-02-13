@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,7 +15,9 @@ const Stack = createNativeStackNavigator();
 const Nav = () => {
   return (
      <NavigationContainer>
-      <Stack.Navigator initialRouteName='Splash' screenOptions={{headerShown:false}}>
+      <Stack.Navigator initialRouteName='Splash' screenOptions={{headerShown:false}} 
+      
+      >
 
         <Stack.Screen name='Splash' component={Splash} />
         <Stack.Screen name="Login" component={Login} />
@@ -23,7 +25,7 @@ const Nav = () => {
     
 
         
-        <Stack.Screen name="BottomTab" component={BottomTab}  options={{ headerShown: true }} />
+        <Stack.Screen name="BottomTab" component={BottomTab}  options={{ headerShown: false }} />
         
       </Stack.Navigator>
     </NavigationContainer>
@@ -31,3 +33,10 @@ const Nav = () => {
 }
 
 export default Nav
+
+
+const styles=StyleSheet.create({
+  toptab:{
+    backgroundColor:'black'
+  }
+})

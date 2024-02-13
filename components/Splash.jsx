@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, View, StyleSheet, Image} from 'react-native';
+import {ActivityIndicator, View, StyleSheet, Image, Text} from 'react-native';
 
 const SplashScreen = props => {
   useEffect(() => {
@@ -11,9 +11,12 @@ const SplashScreen = props => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/tailorFull.png')}
-        style={{width: '90%', resizeMode: 'contain', margin: 30}}
+        source={require('../assets/tailorlogo.png')}
+        style={{width: '80%', resizeMode:'contain', margin: 0}}
       />
+      <Text style={styles.title}>
+        Tailor Hub
+      </Text>
     </View>
   );
 };
@@ -25,6 +28,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'orange',
   },
+  title:{
+    color:"orange",
+    backgroundColor: "white",
+    borderRadius:10,
+    padding:5,
+    paddingBottom:0,
+    paddingTop:0,
+    fontWeight:"bold", 
+    fontSize:40,
+    margin:0,
+    position: 'absolute',
+    top:"67%",
+    
+  }
 });

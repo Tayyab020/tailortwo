@@ -16,6 +16,10 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+
+import axios from "axios";
+
+
 function SignUp(props) {
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const [username, setUsername] = React.useState('');
@@ -29,32 +33,33 @@ function SignUp(props) {
 
 
   
-  const signuphandler=async()=>{
-   
-    console.log("hello")
+  const handleSignup=async()=>{
+    const userData = {
+      
+      username: username,
+      email:email,
+      password:password,
+
+    };
+    console.log(userData)
     try {
-      const name="tayyab"
-      console.log(username,email,name,password)
-      const response = await axios.post("http://localhost:5000/register", {
-        username: username,
-        email: email,
-        name: name,
-        password: password
-      });
+      
+      const response=await axios.post("http://192.168.40.182:3000/register",userData)   
       console.log("login success",response.data)
-      toast.success("login success")
+      // toast.success("login success")
+      props.navigation.navigate('Login')
      
     } catch (error) {
       console.log("login failed ",error.message)
-      toast.error(error.message)
+      // toast.error(error.message)
     }
-    finally{
-      setLoading(false)
-    }
+    // finally{
+    //   setLoading(false)
+    // }
   }
 
   return (
-    <KeyboardAvoidingView style={{flex: 1, alignItems: 'center'}}>
+    <KeyboardAvoidingView style={{flex: 1,backgroundColor:'orange', alignItems: 'center'}}>
       <Image
         source={require('../assets/background.png')}
         style={styles.backgroundImage}
@@ -136,9 +141,9 @@ function SignUp(props) {
               />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity style={styles.button} onPress={handleSignup}>
           {/* () => props.navigation.navigate('Tab') */}
-            <Text style={styles.buttonText} onPress={signuphandler}>SIGN UP</Text>
+            <Text style={styles.buttonText} >SIGN UP</Text>
           </TouchableOpacity>
         </View>
 
@@ -181,7 +186,7 @@ export default SignUp;
 
 const styles = StyleSheet.create({
   backgroundImage: {
-    opacity: 0.6,
+    opacity: 0.9,
     position: 'absolute',
     top: 100,
     resizeMode: 'cover',
@@ -204,7 +209,7 @@ const styles = StyleSheet.create({
     fontSize: 27,
     alignSelf: 'center',
     fontWeight: 'bold',
-    color: 'white',
+    color: '#FF8C00',
     fontFamily: 'Poppins-Bold',
     marginBottom: 10,
     marginTop: 27,
@@ -240,7 +245,7 @@ const styles = StyleSheet.create({
     transform: [{translateY: -10}],
   },
   button: {
-    backgroundColor: '#FF2D00',
+    backgroundColor: '#FF8C00',
     borderRadius: 8,
     padding: 15,
     alignItems: 'center',

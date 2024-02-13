@@ -25,7 +25,7 @@ const authController = {
     // }
 
     // 3. if email or username is already registered -> return an error
-    const { username, name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // try {
     //   const emailInUse = await User.exists({ email });
@@ -66,7 +66,7 @@ const authController = {
       const userToRegister = new User({
         username,
         email,
-        name,
+        // name,
         password: hashedPassword,
       });
 

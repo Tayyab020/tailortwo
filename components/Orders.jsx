@@ -5,8 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 const ManageOrder = () => {
   const navigation = useNavigation();
 
-  const navigateToProfileTab = () => {
-    navigation.navigate('Profile');
+  const navigateToHomeTab = () => {
+    navigation.navigate('Home');
   };
 
   return (
@@ -14,8 +14,8 @@ const ManageOrder = () => {
       <Image style={styles.backImg} source={require("../assets/tailorlogo.png")} />
       <Text style={styles.ttext}>Find all your orders here</Text>
       <Text style={styles.ptext}>Keep an eye out for your first order soon!</Text>
-      <TouchableOpacity onPress={navigateToProfileTab}>
-        <Text style={styles.profileLink}>Go to Profile</Text>
+      <TouchableOpacity onPress={navigateToHomeTab}>
+        <Text style={styles.profileLink}>Go to Home</Text>
       </TouchableOpacity>
     </View>
   );
