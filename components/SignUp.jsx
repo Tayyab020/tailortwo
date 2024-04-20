@@ -10,12 +10,16 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Button,
+  ToastAndroid
 } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
+import * as yup from 'yup';
+import {useForm} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
 
 import axios from "axios";
 
@@ -26,7 +30,11 @@ function SignUp(props) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
- 
+
+  
+
+
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -44,13 +52,15 @@ function SignUp(props) {
     console.log(userData)
     try {
       
-      const response=await axios.post("http://192.168.40.182:3000/register",userData)   
+      const response=await axios.post("http://10.0.2.2:3000/register",userData)   
       console.log("login success",response.data)
+      ToastAndroid.show("login success", ToastAndroid.SHORT);
       // toast.success("login success")
-      props.navigation.navigate('Login')
+      props.navigation.navigate('BottomTab')
      
     } catch (error) {
       console.log("login failed ",error.message)
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
       // toast.error(error.message)
     }
     // finally{

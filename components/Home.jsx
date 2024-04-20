@@ -1,28 +1,51 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { FAB } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { FAB, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
+import axios from 'axios'; 
 const Home = () => {
   const navigation = useNavigation();
+  const [gigs, setGigs] = useState([]); // Step 2: State to store gigs
 
-  const navigateToHomeTab = () => {
-    // Navigate to the desired tab
+  useEffect(() => {
+    // Step 3: Fetch gigs from your backend
+    const fetchGigs = async () => {
+      try {
+        const response = await axios.get('http://10.0.2.2:3000/blog/all');
+        console.log(response)
+        setGigs(response.data); // Update state with fetched gigs
+      } catch (error) {
+        console.error('Failed to fetch gigs:', error);
+      }
+    };
+
+    fetchGigs();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const navigateToOrder = () => {
+    navigation.navigate('creategig');
   };
 
   return (
     <View style={styles.container}>
-      <Image style={styles.backImg} source={require("../assets/tailorlogo.png")} />
-      <Text style={styles.ttext}>Find all your Gigs here</Text>
-      <Text style={styles.ptext}>Keep an eye out for your Gigs</Text>
+      <ScrollView>
+        {/* {gigs.map((gig) => (
+          <Card key={gig.id} style={styles.card}>
+            <Card.Title title={gig.title} />
+            <Card.Content>
+              <Text>{gig.description}</Text>
+            </Card.Content>
+          </Card>
+        ))} */}
+      </ScrollView>
       <FAB
         style={styles.fab}
         icon="plus"
-        onPress={() => console.log('Pressed')}
+        onPress={navigateToOrder}
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -31,30 +54,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  backImg: {
-    width: 150,
-    height: 150,
-  },
-  ttext: {
-    color: '#FF8C00',
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  ptext: {
-    color: 'black',
-    marginTop: 5,
+  card: {
+    marginVertical: 8,
   },
   fab: {
-    fab: {
-      position: 'absolute',
-      margin: 16,
-      right: 0,
-      bottom: 0,
-      color:"white",
-      placement:"right",
-      backgroundColor: '#FF8C00', // Customize button color
-    },
-  
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 80,
+    backgroundColor: '#FF8C00',
   },
 });
 

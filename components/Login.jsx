@@ -9,6 +9,7 @@ import {
   Image,
   ScrollView,
   KeyboardAvoidingView,
+  ToastAndroid
 } from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -19,10 +20,7 @@ import {loginUser, googleAuth, facebookAuth} from '../utils/api';
 import BottomTab from"./Tab"
 
 import axios from "axios";
-import { useNavigation } from '@react-navigation/native'; // import the necessary modules for navigation
-
-// Inside your component function
-
+import { useNavigation } from '@react-navigation/native'; 
 
 function Login(props) {
   const [email, setEmail] = React.useState('');
@@ -42,14 +40,15 @@ function Login(props) {
     console.log(userData)
     try {
       
-      const response=await axios.post("http://192.168.40.182:3000/login",userData)
+      const response=await axios.post("http://10.0.2.2:3000/login",userData)
       console.log("login success",response.data)
       props.navigation.navigate('BottomTab');
+      ToastAndroid.show('login success', ToastAndroid.SHORT);
       // toast.success("login success")
      
     } catch (error) {
       console.log("login failed ",error.message)
-    
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
       // toast.error(error.message)
     }
     // finally{

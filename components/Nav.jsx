@@ -8,8 +8,11 @@ import Splash from "./Splash"
 import Login from "./Login"
 import SignUp from './SignUp'
 
-import Home from './Home'
+import Orders from './Orders'
 import BottomTab from './Tab';
+import creategigs from './creategig'
+
+import Home from './Home';
 
 const Stack = createNativeStackNavigator();
 const Nav = () => {
@@ -22,6 +25,11 @@ const Nav = () => {
         <Stack.Screen name='Splash' component={Splash} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="SignUp" component={SignUp} />
+        <Stack.Screen name='Orders' component={Orders}/>
+
+        <Stack.Screen name='creategig' component={creategigs}/>
+
+        {/* <Stack.Screen name='Home' component={Home}/> */}
     
 
         

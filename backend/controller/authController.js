@@ -5,10 +5,11 @@ const UserDTO = require("../dto/user");
 const JWTService = require("../services/JWTService");
 const RefreshToken = require("../models/token");
 
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{7,25}$/;
 
 const authController = {
   async register(req, res, next) {
+    console.log(req.body);
     // 1. validate user input
     // const userRegisterSchema = Joi.object({
     //   username: Joi.string().min(5).max(30).required(),
@@ -27,31 +28,31 @@ const authController = {
     // 3. if email or username is already registered -> return an error
     const { username, email, password } = req.body;
 
-    // try {
-    //   const emailInUse = await User.exists({ email });
+    try {
+      const emailInUse = await User.exists({ email });
 
-    //   const usernameInUse = await User.exists({ username });
+      const usernameInUse = await User.exists({ username });
 
-    //   if (emailInUse) {
-    //     const error = {
-    //       status: 409,
-    //       message: "Email already registered, use another email!",
-    //     };
+      if (emailInUse) {
+        const error = {
+          status: 409,
+          message: "Email already registered, use another email!",
+        };
 
-    //     return next(error);
-    //   }
+        return next(error);
+      }
 
-    //   if (usernameInUse) {
-    //     const error = {
-    //       status: 409,
-    //       message: "Username not available, choose another username!",
-    //     };
+      if (usernameInUse) {
+        const error = {
+          status: 409,
+          message: "Username not available, choose another username!",
+        };
 
-    //     return next(error);
-    //   }
-    // } catch (error) {
-    //   return next(error);
-    // }
+        return next(error);
+      }
+    } catch (error) {
+      return next(error);
+    }
 
     // 4. password hash
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -76,6 +77,13 @@ const authController = {
       // accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
 
       // refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
+
+      // res.status(200).json(
+      //   {
+      //     message:"User created Successfully"
+      //   }
+      // )
+
     } 
     catch (error) {
       return next(error);
@@ -84,20 +92,20 @@ const authController = {
     // // store refresh token in db
     // await JWTService.storeRefreshToken(refreshToken, user._id);
 
-    // // send tokens in cookie
-    // res.cookie("accessToken", accessToken, {
-    //   maxAge: 1000 * 60 * 60 * 24,
-    //   httpOnly: true,
-    // });
+    // send tokens in cookie
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
 
-    // res.cookie("refreshToken", refreshToken, {
-    //   maxAge: 1000 * 60 * 60 * 24,
-    //   httpOnly: true,
-    // });
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
 
     // // 6. response send
 
-    // const userDto = new UserDTO(user);
+    const userDto = new UserDTO(user);
 
     return res.status(201).json({ user: User, auth: true });
   },

@@ -13,12 +13,15 @@ const Comment = require("../models/comment");
 
 const cloudinary = require("cloudinary").v2;
 
+
+console.log("blog")
+
 // Configuration
-cloudinary.config({
-  cloud_name: CLOUD_NAME,
-  api_key: API_KEY,
-  api_secret: API_SECRET,
-});
+// cloudinary.config({
+//   cloud_name: CLOUD_NAME,
+//   api_key: API_KEY,
+//   api_secret: API_SECRET,
+// });
 
 const mongodbIdPattern = /^[0-9a-fA-F]{24}$/;
 
@@ -33,9 +36,9 @@ const blogController = {
 
     const createBlogSchema = Joi.object({
       title: Joi.string().required(),
-      author: Joi.string().regex(mongodbIdPattern).required(),
-      content: Joi.string().required(),
-      photo: Joi.string().required(),
+      // author: Joi.string().regex(mongodbIdPattern).required(),
+      // content: Joi.string().required(),
+      // photo: Joi.string().required(),
     });
 
     const { error } = createBlogSchema.validate(req.body);
@@ -44,8 +47,9 @@ const blogController = {
       return next(error);
     }
 
-    const { title, author, content, photo } = req.body;
-
+    // const { title, author, content, photo } = req.body;
+    const { title} = req.body;
+    console.log(req.body);
     // read as buffer
     // const buffer = Buffer.from(
     //   photo.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""),
@@ -58,21 +62,21 @@ const blogController = {
     // save to cloudinary
     let response;
 
-    try {
-      response = await cloudinary.uploader.upload(photo);
-      // fs.writeFileSync(`storage/${imagePath}`, buffer);
-    } catch (error) {
-      return next(error);
-    }
+    // try {
+    //   response = await cloudinary.uploader.upload(photo);
+    //         // fs.writeFileSync(`storage/${imagePath}`, buffer);
+    // } catch (error) {
+    //   return next(error);
+    // }
 
     // save blog in db
     let newBlog;
     try {
       newBlog = new Blog({
         title,
-        author,
-        content,
-        photoPath: response.url,
+        // author,
+        // content,
+        // photoPath: response.url,
       });
 
       await newBlog.save();
@@ -134,10 +138,10 @@ const blogController = {
 
     const updateBlogSchema = Joi.object({
       title: Joi.string().required(),
-      content: Joi.string().required(),
-      author: Joi.string().regex(mongodbIdPattern).required(),
-      blogId: Joi.string().regex(mongodbIdPattern).required(),
-      photo: Joi.string(),
+      // content: Joi.string().required(),
+      // author: Joi.string().regex(mongodbIdPattern).required(),
+      // blogId: Joi.string().regex(mongodbIdPattern).required(),
+      // photo: Joi.string(),
     });
 
     const { error } = updateBlogSchema.validate(req.body);
