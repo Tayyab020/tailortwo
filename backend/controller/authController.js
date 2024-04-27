@@ -5,25 +5,25 @@ const UserDTO = require("../dto/user");
 const JWTService = require("../services/JWTService");
 const RefreshToken = require("../models/token");
 
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{7,25}$/;
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
   async register(req, res, next) {
     console.log(req.body);
     // 1. validate user input
-    // const userRegisterSchema = Joi.object({
-    //   username: Joi.string().min(5).max(30).required(),
-    //   name: Joi.string().max(30).required(),
-    //   email: Joi.string().email().required(),
-    //   password: Joi.string().pattern(passwordPattern).required(),
-    //   confirmPassword: Joi.ref("password"),
-    // });
-    // const { error } = userRegisterSchema.validate(req.body);
+    const userRegisterSchema = Joi.object({
+      username: Joi.string().min(5).max(30).required(),
+      // name: Joi.string().max(30).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().pattern(passwordPattern).required(),
+      confirmPassword: Joi.ref("password"),
+    });
+    const { error } = userRegisterSchema.validate(req.body);
 
     // 2. if error in validation -> return error via middleware
-    // if (error) {
-    //   return next(error);
-    // }
+    if (error) {
+      return next(error);
+    }
 
     // 3. if email or username is already registered -> return an error
     const { username, email, password } = req.body;
@@ -74,9 +74,9 @@ const authController = {
       user = await userToRegister.save();
 
       // token generation
-      // accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
 
-      // refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
+      accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
+      refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
 
       // res.status(200).json(
       //   {
@@ -89,8 +89,8 @@ const authController = {
       return next(error);
     }
 
-    // // store refresh token in db
-    // await JWTService.storeRefreshToken(refreshToken, user._id);
+    // store refresh token in db
+    await JWTService.storeRefreshToken(refreshToken, user._id);
 
     // send tokens in cookie
     res.cookie("accessToken", accessToken, {
@@ -117,16 +117,16 @@ const authController = {
     // 4. return response
 
     // we expect input data to be in such shape
-    // const userLoginSchema = Joi.object({
-    //   username: Joi.string().min(5).max(30).required(),
-    //   password: Joi.string().pattern(passwordPattern),
-    // });
+    const userLoginSchema = Joi.object({
+      username: Joi.string().min(5).max(30).required(),
+      password: Joi.string().pattern(passwordPattern),
+    });
 
-    // const { error } = userLoginSchema.validate(req.body);
+    const { error } = userLoginSchema.validate(req.body);
 
-    // if (error) {
-    //   return next(error);
-    // }
+    if (error) {
+      return next(error);
+    }
 
     const { username, password } = req.body;
 
@@ -165,33 +165,33 @@ const authController = {
       return next(error);
     }
 
-    // const accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
-    // const refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
+    const accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
+    const refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
 
     // update refresh token in database
-    // try {
-    //   await RefreshToken.updateOne(
-    //     {
-    //       _id: user._id,
-    //     },
-    //     { token: refreshToken },
-    //     { upsert: true }
-    //   );
-    // } catch (error) {
-    //   return next(error);
-    // }
+    try {
+      await RefreshToken.updateOne(
+        {
+          _id: user._id,
+        },
+        { token: refreshToken },
+        { upsert: true }
+      );
+    } catch (error) {
+      return next(error);
+    }
 
-    // res.cookie("accessToken", accessToken, {
-    //   maxAge: 1000 * 60 * 60 * 24,
-    //   httpOnly: true,
-    // });
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
 
-    // res.cookie("refreshToken", refreshToken, {
-    //   maxAge: 1000 * 60 * 60 * 24,
-    //   httpOnly: true,
-    // });
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
 
-    // const userDto = new UserDTO(user);
+    const userDto = new UserDTO(user);
 
     return res.status(200).json({ user: user, auth: true });
   },

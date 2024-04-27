@@ -31,19 +31,19 @@ router.get('/refresh', authController.refresh);
 // blog
 
 // create
-// router.post('/blog', auth, blogController.create);
-router.post('/blog', blogController.create);
+router.post('/blog', auth, blogController.create);
+// router.post('/blog', blogController.create);
 
 // get all
 
-// router.get('/blog/all', auth, blogController.getAll);
-router.get('/blog/all', blogController.getAll);
+router.get('/blog/all', auth, blogController.getAll);
+// router.get('/blog/all', blogController.getAll);
 
 // get blog by id
 
-// router.get('/blog/:id', auth, blogController.getById);
+router.get('/blog/:id', auth, blogController.getById);
 
-router.get('/blog/:id',  blogController.getById);
+// router.get('/blog/:id',  blogController.getById);
 
 // update
 router.put('/blog', auth, blogController.update);

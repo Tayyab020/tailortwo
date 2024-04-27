@@ -40,7 +40,7 @@ function Login(props) {
     console.log(userData)
     try {
       
-      const response=await axios.post("http://10.0.2.2:3000/login",userData)
+      const response=await axios.post("http://192.168.56.160:3000/login",userData)
       console.log("login success",response.data)
       props.navigation.navigate('BottomTab');
       ToastAndroid.show('login success', ToastAndroid.SHORT);

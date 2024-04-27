@@ -26,6 +26,7 @@
     "expo-blur": "^12.9.1",
     "expo-font": "^11.10.2",
     "express": "^4.18.2",
+    "formik": "^2.4.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.1",
     "npm-assets": "^0.1.2",
