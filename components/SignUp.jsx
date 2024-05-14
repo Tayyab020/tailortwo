@@ -68,7 +68,7 @@ const SignupSchema = Yup.object().shape({
     console.log(userData)
     try {
       
-      const response=await axios.post("http://10.0.2.2:3000/register",userData)   
+      const response=await axios.post("http://1192.168.166.160:3000/register",userData)   
       console.log("login success",response.data)
       ToastAndroid.show("login success", ToastAndroid.SHORT);
       // toast.success("login success")
@@ -101,7 +101,7 @@ const SignupSchema = Yup.object().shape({
           validationSchema={SignupSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              const response = await axios.post("http://192.168.56.160:3000/register", values);
+              const response = await axios.post("http://192.168.32.160:3000/register", values);
               console.log("Account created Sucessfully", response.data);
               ToastAndroid.show("Account created Sucessfully", ToastAndroid.SHORT);
               props.navigation.navigate('BottomTab');

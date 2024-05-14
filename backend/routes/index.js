@@ -36,8 +36,8 @@ router.post('/blog', auth, blogController.create);
 
 // get all
 
-router.get('/blog/all', auth, blogController.getAll);
-// router.get('/blog/all', blogController.getAll);
+// router.get('/blog/all', auth, blogController.getAll);
+router.get('/blog/all', blogController.getAll);
 
 // get blog by id
 

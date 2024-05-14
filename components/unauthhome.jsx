@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ScrollView,View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useState, useEffect } from 'react';
@@ -8,14 +9,19 @@ import { getAllBlogs } from "../api/internal";
 import axios from 'axios';
 
 
-const CustomCard = () => {
+import store from '../store/store'; // Import the store
+const currentState = store.getState();
+console.log(currentState);
+
+const Home = () => {
   const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
     const fetchGigs = async () => {
       try {
-        const response = await axios.get('http://192.168.166.160:3000/blog/all');
-        console.log(response);
+        const response = await getAllBlogs()
+        // console.log(response);
+        
         if (response.status === 200) {
           setBlogs(response.data.blogs);
         }
@@ -25,7 +31,7 @@ const CustomCard = () => {
       }
     };
 
-    fetchGigs();
+    fetchGigs([]);
   }, []);
 
   const navigation = useNavigation();
@@ -37,7 +43,8 @@ const CustomCard = () => {
   };
   return (
     <View style={styles.container}>
-       <ScrollView style={styles.ScrollView}>
+      
+<ScrollView style={styles.ScrollView}>
        {blogs.map((blog, index) => (
          <TouchableOpacity  key={index} style={styles.cardcontainer}>
          <View style={styles.imageContainer}>
@@ -57,6 +64,7 @@ const CustomCard = () => {
        ))}
          
        </ScrollView>
+      
     </View>
   
   );
@@ -66,7 +74,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    padding: 20,
+    padding: 10,
+    paddingTop:0,
+    paddingBottom: 0,
     width:"100%",
     overflow: 'hidden',
   },
@@ -126,6 +136,7 @@ const styles = StyleSheet.create({
     color: '#EEF6D5',
     fontWeight: 'bold',
   },
+
 });
 
-export default CustomCard;
+export default Home;

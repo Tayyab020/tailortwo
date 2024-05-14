@@ -21,7 +21,9 @@ import BottomTab from"./Tab"
 
 import axios from "axios";
 import { useNavigation } from '@react-navigation/native'; 
-
+import {login} from"../api/internal"
+import { setUser } from '../store/userSlice';
+import { useDispatch } from 'react-redux';
 function Login(props) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -30,31 +32,52 @@ function Login(props) {
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
-
+  const dispatch = useDispatch();
   const handleSignIn=async()=>{
+    
+  
+
     const userData = {
-      
       username: email,
       password:password
     };
     console.log(userData)
-    try {
-      
-      const response=await axios.post("http://192.168.56.160:3000/login",userData)
+    try{
+      const response=await login(userData)
       console.log("login success",response.data)
-      props.navigation.navigate('BottomTab');
-      ToastAndroid.show('login success', ToastAndroid.SHORT);
-      // toast.success("login success")
-     
-    } catch (error) {
+      
+      if (response.status === 200) {
+        
+        // 1. setUser
+        const user = {
+          _id: response.data.user._id,
+          email: response.data.user.email,
+          username: response.data.user.username,
+          auth: response.data.auth,
+        };
+  
+        dispatch(setUser(user));
+        // console.log(`setUser success`,user)
+        // 2. redirect -> homepage
+        props.navigation.navigate('BottomTab');
+        ToastAndroid.show('login success', ToastAndroid.SHORT);
+      
+      } else if (response.code === "ERR_BAD_REQUEST") {
+        // display error message
+        setError(response.response.data.message);
+      }
+    }
+     catch (error) {
       console.log("login failed ",error.message)
       ToastAndroid.show(error.message, ToastAndroid.SHORT);
-      // toast.error(error.message)
     }
     // finally{
     //   setLoading(false)
     // }
   }
+
+
+  
   // const handleSignIn = async () => {
     
   //   try {

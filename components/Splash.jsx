@@ -4,7 +4,7 @@ import {ActivityIndicator, View, StyleSheet, Image, Text} from 'react-native';
 const SplashScreen = props => {
   useEffect(() => {
     setTimeout(() => {
-      props.navigation.navigate('SignUp');
+      props.navigation.navigate('BottomTab');
     }, 2000);
   }, []);
 
@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'orange',
+   
   },
   title:{
     color:"orange",

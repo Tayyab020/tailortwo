@@ -1,12 +1,13 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://192.168.157.160:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
 
 export const login = async (data) => {
   let response;
@@ -28,7 +29,7 @@ export const signup = async (data) => {
   } catch (error) {
     return error;
   }
-
+  console.log(response);
   return response;
 };
 
@@ -48,6 +49,7 @@ export const getAllBlogs = async () => {
 
   try {
     response = await api.get("/blog/all");
+    console.log(response);
   } catch (error) {}
 
   return response;
