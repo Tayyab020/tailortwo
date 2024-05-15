@@ -135,7 +135,7 @@ const Home = () => {
     };
 
     fetchGigs([]);
-  }, []);
+  }, );
 
   const navigation = useNavigation();
   

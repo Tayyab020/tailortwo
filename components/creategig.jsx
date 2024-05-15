@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TextInput, Button, Image, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-
-const App = () => {
+import { useSelector } from 'react-redux';
+import {submitBlog} from"../api/internal"
+import axios from 'axios';
+const App = (props) => {
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
-
+  const author=useSelector((state)=>state.user._id)
   const handleChoosePhoto = () => {
     const options = {
       title: 'Select Image',
@@ -23,11 +25,38 @@ const App = () => {
     });
   };
 
-  const handleSubmit = () => {
-    // Here, you can use the title, description, and image for further processing, such as sending them to a server or saving locally.
-    console.log('Title:', title);
-    console.log('Description:', description);
-    console.log('Image:', image);
+  const handleSubmit = async() => { 
+   
+    const userData = {
+      author,
+      title: title,
+      content: content,
+      // image: image,
+    };
+   
+    try{
+      console.log(userData)
+         const response=await submitBlog(userData)
+      // const response=await axios.post("http://10.0.2.2:3000/create",userData)   
+    
+      console.log("gig created successfully",response.data)
+      
+      if (response.status === 201) {
+        // console.log(`setUser success`,user)
+        // 2. redirect -> homepage
+        props.navigation.navigate('BottomTab');
+        ToastAndroid.show('Gig created', ToastAndroid.SHORT);
+      
+      } else if (response.code === "ERR_BAD_REQUEST") {
+        // display error message
+        // setError(response.response.data.message);
+      }
+    }
+     catch (error) {
+      console.log("Gig creation failed ",error.message)
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    }
+   
   };
 
   return (
@@ -41,8 +70,8 @@ const App = () => {
       <TextInput
         style={styles.input}
         placeholder="Description"
-        value={description}
-        onChangeText={text => setDescription(text)}
+        value={content}
+        onChangeText={text => setContent(text)}
         multiline
       />
       <TouchableOpacity style={styles.imageContainer} onPress={handleChoosePhoto}>
