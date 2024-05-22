@@ -1,87 +1,79 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Image, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
-import ImagePicker from 'react-native-image-picker';
+import { View, TextInput, Image, StyleSheet, TouchableOpacity, ToastAndroid, Text } from 'react-native';
 import { useSelector } from 'react-redux';
-import {submitBlog} from"../api/internal"
-import axios from 'axios';
-const App = (props) => {
+import { submitBlog } from "../api/internal";
+import { launchImageLibrary } from 'react-native-image-picker';
+import { useNavigation } from '@react-navigation/native';
+
+const CreateBlog = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
-  const author=useSelector((state)=>state.user._id)
-  const handleChoosePhoto = () => {
-    const options = {
-      title: 'Select Image',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
+  const author = useSelector((state) => state.user._id);
+  const navigation = useNavigation();
 
-    ImagePicker.showImagePicker(options, response => {
-      if (response.uri) {
-        setImage(response.uri);
-      }
-    });
+  const handleChoosePhoto = async () => {
+    const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.5, includeBase64: true });
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      const base64 = `data:${asset.type};base64,${asset.base64}`;
+      setImage(base64);
+    }
   };
 
-  const handleSubmit = async() => { 
-   
-    const userData = {
-      author,
-      title: title,
-      content: content,
-      // image: image,
-    };
-   
-    try{
-      console.log(userData)
-         const response=await submitBlog(userData)
-      // const response=await axios.post("http://10.0.2.2:3000/create",userData)   
+  const handleSubmit = async () => {
+    console.log('Submit button clicked');
     
-      console.log("gig created successfully",response.data)
-      
+    const blogData = {
+      author,
+      title,
+      content,
+      photoPath: image, // Use the selected image
+    };
+    console.log('Blog data:', blogData);
+
+    try {
+      const response = await submitBlog(blogData);
+      console.log('Response:', response);
       if (response.status === 201) {
-        // console.log(`setUser success`,user)
-        // 2. redirect -> homepage
-        props.navigation.navigate('BottomTab');
-        ToastAndroid.show('Gig created', ToastAndroid.SHORT);
-      
-      } else if (response.code === "ERR_BAD_REQUEST") {
-        // display error message
-        // setError(response.response.data.message);
+        ToastAndroid.show('Blog created', ToastAndroid.SHORT);
+        navigation.navigate('Home');
+      } else {
+        ToastAndroid.show('Error creating blog', ToastAndroid.SHORT);
       }
-    }
-     catch (error) {
-      console.log("Gig creation failed ",error.message)
+    } catch (error) {
+      console.log('Error:', error.message);
       ToastAndroid.show(error.message, ToastAndroid.SHORT);
     }
-   
   };
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Create a New Gig</Text>
       <TextInput
         style={styles.input}
         placeholder="Title"
         value={title}
         onChangeText={text => setTitle(text)}
+        placeholderTextColor="#666"
       />
       <TextInput
-        style={styles.input}
-        placeholder="Description"
+        style={[styles.input, styles.textArea]}
+        placeholder="Content"
         value={content}
         onChangeText={text => setContent(text)}
         multiline
+        placeholderTextColor="#666"
       />
-      <TouchableOpacity style={styles.imageContainer} onPress={handleChoosePhoto}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
-        ) : (
-          <Button title="Choose Image" onPress={handleChoosePhoto} />
-        )}
+      <TouchableOpacity style={styles.imageButton} onPress={handleChoosePhoto}>
+        <Text style={styles.imageButtonText}>Choose Image</Text>
       </TouchableOpacity>
-      <Button title="Submit" onPress={handleSubmit} />
+      {image && (
+        <Image source={{ uri: image }} style={styles.image} />
+      )}
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -89,9 +81,16 @@ const App = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#EEF6D5',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#FF7F11',
   },
   input: {
     width: '100%',
@@ -101,16 +100,42 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
+    backgroundColor: '#FFF',
   },
-  imageContainer: {
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 10,
+  },
+  imageButton: {
+    backgroundColor: '#FF7F11',
+    padding: 10,
+    borderRadius: 5,
     marginBottom: 20,
+  },
+  imageButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
   },
   image: {
     width: 200,
     height: 200,
     resizeMode: 'cover',
     borderRadius: 5,
+    marginBottom: 20,
+  },
+  submitButton: {
+    backgroundColor: '#FF7F11',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '100%',
+  },
+  submitButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
-export default App;
+export default CreateBlog;

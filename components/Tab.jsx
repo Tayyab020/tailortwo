@@ -14,13 +14,26 @@ import unauthhome from './unauthhome';
 import unauthmsg from './unauthmsg';
 import unauthorder from './unauthorder';
 import  unauthprofile from './unauthprofile';
-
+import { useDispatch } from 'react-redux';
+import { setUser } from '../store/userSlice';
 import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Tab = createBottomTabNavigator();
 // const Tab = createMaterialBottomTabNavigator()
 function BottomTab() {
+  const getData=async()=>{
+    const jsonValue = await AsyncStorage.getItem('user');
+      const storedonStorage=JSON.parse(jsonValue) 
+      console.log("Async stored Sucessfully on Tab",storedonStorage)
+
+      dispatch(setUser(storedonStorage));
+  }
+  getData()
+  const dispatch = useDispatch();
   const isAuthenticated=useSelector((state)=>state.user.auth)
+  console.log("isAuthenticated",isAuthenticated)
+
   return (
     
     <Tab.Navigator 
@@ -123,6 +136,7 @@ function BottomTab() {
          tabBarIcon: () => (
            <MaterialCommunityIcons name="account" color={"white"} size={26} />
          ),
+         headerShown: false, 
          headerStyle: {
            backgroundColor: '#FF8C00',
            height: 80, 

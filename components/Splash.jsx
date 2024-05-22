@@ -1,10 +1,26 @@
 import React, {useState, useEffect} from 'react';
 import {ActivityIndicator, View, StyleSheet, Image, Text} from 'react-native';
-
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../store/userSlice';
+import { useSelector } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const SplashScreen = props => {
+  // const [isAuthenticated,setisAuthenticated]=useState(false)
+  //  const getData=async()=>{
+  //   const jsonValue = await AsyncStorage.getItem('user');
+  //     const storedonStorage=JSON.parse(jsonValue) 
+  //     console.log("Async stored Sucessfully on splash",storedonStorage)
+
+  //     dispatch(setUser(jsonValue));
+  // }
+  // getData()
+  // const dispatch = useDispatch();
+  // const isAuthenticated=useSelector((state)=>state.user.auth)
   useEffect(() => {
-    setTimeout(() => {
+    setTimeout(async () => {
       props.navigation.navigate('BottomTab');
+     
     }, 2000);
   }, []);
 

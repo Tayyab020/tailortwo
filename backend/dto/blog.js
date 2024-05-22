@@ -1,11 +1,13 @@
-class BlogDTO{
-    constructor(blog){
-        this._id = blog._id;
-        this.author = blog.author;
-        this.content = blog.content;
-        this.title = blog.title;
-        this.photo = blog.photoPath;
+class BlogDTO {
+    constructor(blog) {
+      this._id = blog._id;
+      this.title = blog.title;
+      this.content = blog.content;
+      this.photoPath = blog.photoPath;
+      this.author = blog.author._id;
+      this.username = blog.author.username; // This should correctly access the populated username
     }
-}
-
-module.exports = BlogDTO;
+  }
+  
+  module.exports = BlogDTO;
+  

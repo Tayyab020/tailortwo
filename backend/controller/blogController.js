@@ -2,7 +2,7 @@ const Joi = require("joi");
 const fs = require("fs");
 const Blog = require("../models/blog");
 const {
-  // BACKEND_SERVER_PATH,
+  BACKEND_SERVER_PATH,
   CLOUD_NAME,
   API_SECRET,
   API_KEY,
@@ -10,101 +10,79 @@ const {
 const BlogDTO = require("../dto/blog");
 const BlogDetailsDTO = require("../dto/blog-details");
 const Comment = require("../models/comment");
-const { Console } = require("console");
-
+const path = require('path'); 
 const cloudinary = require("cloudinary").v2;
 
+
 // Configuration
-// cloudinary.config({
-//   cloud_name: CLOUD_NAME,
-//   api_key: API_KEY,
-//   api_secret: API_SECRET,
-// });
+cloudinary.config({
+  cloud_name: "daybsp2pi",
+  api_key: "285512611414353",
+  api_secret: "F3P4Pe-DGLyjAplnf9RVLWcRLfw",
+});
 
 const mongodbIdPattern = /^[0-9a-fA-F]{24}$/;
 
 const blogController = {
-  async create(req, res, next) {
-    // 1. validate req body
-    // 2. handle photo storage, naming
-    // 3. add to db
-    // 4. return response
 
-    // client side -> base64 encoded string -> decode -> store -> save photo's path in db
-    console.log("client side");
-    // const createBlogSchema = Joi.object({
-    //   title: Joi.string().required(),
-    //   author: Joi.string().regex(mongodbIdPattern).required(),
-    //   content: Joi.string().required(),
-    //   photo: Joi.string()
-    //    });
-    // console.log("working_")
-    // const { error } = createBlogSchema.validate(req.body);
-
-    // if (error) {
-    //   return next(error);
-    // }
-
-    const { title, author, content, photo } = req.body;
-    console.log(req.body);
-    // read as buffer
-    // const buffer = Buffer.from(
-    //   photo.replace(/^data:image\/(png|jpg|jpeg);base64,/, ""),
-    //   "base64"
-    // );
-
-    // allot a random name
-    // const imagePath = `${Date.now()}-${author}.png`;
-
-    // save to cloudinary
-    let response;
-
-    // try {
-    //   // response = await cloudinary.uploader.upload(photo);
-    //   fs.writeFileSync(`storage/${imagePath}`, buffer);
-    // } catch (error) {
-    //   return next(error);
-    // }
-
-    // save blog in db
-
-    BACKEND_SERVER_PATH="http://localhost:3000"
-    let newBlog;
-
-    try {
-      newBlog = new Blog({
-        title,
-        author,
-        content,
-        // photoPath: `${BACKEND_SERVER_PATH}/storage/${imagePath}`,
-        // photoPath: response.url,
+ async create(req, res, next) {
+      // Validate request body
+      const createBlogSchema = Joi.object({
+        title: Joi.string().required(),
+        author: Joi.string().regex(mongodbIdPattern).required(),
+        content: Joi.string().required(),
+        photoPath: Joi.string().required(), // Ensure photo is base64 encoded
       });
-     
-      await newBlog.save();
-    } catch (error) {
-      return next(error);
-    }
-
-    const blogDto = new BlogDTO(newBlog);
-
-    return res.status(201).json({ blog: blogDto });
-  },
+  
+      const { error } = createBlogSchema.validate(req.body);
+  
+      if (error) {
+        return next(error);
+      }
+  
+      const { title, author, content, photoPath } = req.body;
+  
+      // Upload photo to Cloudinary
+      let photoUrl;
+      try {
+        const uploadResult = await cloudinary.uploader.upload(photoPath, { folder: 'blog_photos' });
+        photoUrl = uploadResult.secure_url;
+      } catch (cloudinaryError) {
+        // Handle Cloudinary upload error
+        return res.status(500).json({ error: 'Failed to upload photo to Cloudinary' });
+      }
+  
+      // Save blog in DB with Cloudinary URL
+      try {
+        const newBlog = new Blog({
+          title,
+          author,
+          content,
+          photoPath: photoUrl, // Store Cloudinary URL instead of local path
+      
+        });
+  
+        await newBlog.save();
+  
+        // Populate the author field to include the username
+        await newBlog.populate('author', 'username')
+  
+        const blogDto = new BlogDTO(newBlog);
+        return res.status(201).json({ blog: blogDto });
+      } catch (dbError) {
+        // Handle database save error
+        return res.status(500).json({ error: 'Failed to save blog to database' });
+      }
+    },
   async getAll(req, res, next) {
     try {
-      const blogs = await Blog.find({});
-
-      const blogsDto = [];
-
-      for (let i = 0; i < blogs.length; i++) {
-        const dto = new BlogDTO(blogs[i]);
-        blogsDto.push(dto);
-      }
-
+      const blogs = await Blog.find({}).populate('author', 'username');
+      const blogsDto = blogs.map(blog => new BlogDTO(blog));
       return res.status(200).json({ blogs: blogsDto });
     } catch (error) {
       return next(error);
     }
-  },
+  },    
   async getById(req, res, next) {
     // validate id
     // response

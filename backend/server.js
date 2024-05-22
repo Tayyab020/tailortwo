@@ -35,6 +35,7 @@ app.use(router);
 dbConnect();
 
 app.use("/storage", express.static("storage"));
+app.use('/storage', express.static('D:\\tailortwo\\backend\\storage'));
 
 app.use(errorHandler);
 

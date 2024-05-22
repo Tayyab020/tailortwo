@@ -21,6 +21,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import Feather from 'react-native-vector-icons/Feather';
 
+import { signup } from '../api/internal';
 
 import axios from "axios";
 
@@ -101,7 +102,7 @@ const SignupSchema = Yup.object().shape({
           validationSchema={SignupSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              const response = await axios.post("http://192.168.32.160:3000/register", values);
+              const response = await axios.post(signup, values);
               console.log("Account created Sucessfully", response.data);
               ToastAndroid.show("Account created Sucessfully", ToastAndroid.SHORT);
               props.navigation.navigate('BottomTab');
