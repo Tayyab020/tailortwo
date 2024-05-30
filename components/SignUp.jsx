@@ -58,32 +58,7 @@ const SignupSchema = Yup.object().shape({
   };
 
   
-  const handleSignup=async()=>{
-    const userData = {
-      
-      username: username,
-      email:email,
-      password:password,
-
-    };
-    console.log(userData)
-    try {
-      
-      const response=await axios.post("http://1192.168.166.160:3000/register",userData)   
-      console.log("login success",response.data)
-      ToastAndroid.show("login success", ToastAndroid.SHORT);
-      // toast.success("login success")
-      props.navigation.navigate('BottomTab')
-     
-    } catch (error) {
-      console.log("login failed ",error.message)
-      ToastAndroid.show(error.message, ToastAndroid.SHORT);
-      // toast.error(error.message)
-    }
-    // finally{
-    //   setLoading(false)
-    // }
-  }
+ 
 
   return (
     <KeyboardAvoidingView style={{flex: 1,backgroundColor:'orange', alignItems: 'center'}}>

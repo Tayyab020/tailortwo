@@ -1,23 +1,67 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signout } from '../api/internal';
 import { resetUser } from '../store/userSlice';
+import { updateProfileImage, getProfileImage } from '../api/internal';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-const Profile = (props) => {
+
+import { StatusBar } from 'react-native';
+const Profile = () => {
+  
   const dispatch = useDispatch();
   const navigation = useNavigation();
-
   const user = useSelector((state) => state.user);
-  const [profileImage, setProfileImage] = React.useState(null);
+  //StatusBar.setHidden(true, 'none');
+  StatusBar.setBackgroundColor('transparent');
+  
+  const [profileImage, setProfileImage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sellerMode, setSellerMode] = useState(true);
+  const [notifications, setNotifications] = useState(2); // Example notification count
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const response = await getProfileImage(user._id);
+        if (response.status === 200) {
+          setProfileImage(response.data.profileImage);
+        } else {
+          console.error('Failed to fetch profile image, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user && user._id) {
+      fetchProfileImage();
+    }
+  }, [user]);
 
   const handleChoosePhoto = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.5, includeBase64: true });
-    if (!result.didCancel) {
-      setProfileImage(result.assets[0].uri);
+    if (!result.didCancel && result.assets && result.assets.length > 0) {
+      const asset = result.assets[0];
+      const base64 = `data:${asset.type};base64,${asset.base64}`;
+      setProfileImage(base64);
+
+      try {
+        const response = await updateProfileImage(user._id, base64);
+        if (response.status === 200) {
+          const updatedUser = { ...user, profileImage: base64 };
+          dispatch(resetUser(updatedUser));
+          await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
     }
   };
 
@@ -40,7 +84,7 @@ const Profile = (props) => {
             };
             await AsyncStorage.setItem('user', JSON.stringify(resetUserData));
 
-            navigation.navigate('Login');
+            navigation.navigate('Home');
           }
         },
       ],
@@ -49,103 +93,240 @@ const Profile = (props) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    
+    <View style={styles.container}>
+    <StatusBar translucent backgroundColor="transparent" />
+
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleChoosePhoto}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          ) : (
-            <View style={styles.profileImagePlaceholder}>
-              <Text style={styles.profileImagePlaceholderText}>Upload Photo</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <Text style={styles.username}>{user.username}</Text>
-        <Text style={styles.email}>{user.email}</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity onPress={handleChoosePhoto}>
+            {profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.profileImagePlaceholder}>
+                <Text style={styles.profileImagePlaceholderText}>Upload Photo</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <View style={styles.headerInfo}>
+            <Text style={styles.username}>{user.username}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+          </View>
+          <View style={styles.notificationContainer}>
+            <Icon name="bell" size={25} color="#FFF" />
+            {notifications > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>{notifications}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+        <View style={styles.sellerModeContainer}>
+          <Text style={styles.sellerModeText}>Seller Mode</Text>
+          <Switch
+            value={sellerMode}
+            onValueChange={(value) => setSellerMode(value)}
+            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={sellerMode ? "#f5dd4b" : "#f4f3f4"}
+          />
+        </View>
       </View>
-      <View style={styles.optionsContainer}>
-        <TouchableOpacity style={styles.optionButton}>
-          <Text style={styles.optionText}>Dashboard</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton}>
-          <Text style={styles.optionText}>Gigs</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton}>
-          <Text style={styles.optionText}>Orders</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton}>
-          <Text style={styles.optionText}>Messages</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton}>
-          <Text style={styles.optionText}>Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
-          <Text style={styles.optionText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      
+      <ScrollView contentContainerStyle={styles.scrollableContent}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Selling</Text>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="dollar" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Earnings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="users" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Buyer Requests</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="file-text" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Custom Offer Templates</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="share" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Share My Gigs</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>General</Text>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="cog" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="user" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>My Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="circle" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Online Status</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="credit-card" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Payments</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="users" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Invite Friends</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton}>
+            <Icon name="support" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Support</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
+            <Icon name="sign-out" size={20} color="#333" style={styles.optionIcon} />
+            <Text style={styles.optionText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    backgroundColor: '#EEF6D5',
+    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    width: '100%',
-    backgroundColor: '#FF7F11',
-    padding: 20,
-    justifyContent: 'center',
+    zIndex: 1,  
+    backgroundColor: '#FF8C00',
+    paddingBottom: 20,
+    paddingTop: 60,
+  },
+  headerTop: {
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop:20,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+   
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 20,
+    marginTop:10
   },
   profileImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#ccc',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginRight: 20,
   },
   profileImagePlaceholderText: {
+    
     color: '#FFF',
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  headerInfo: {
+    flex: 1,
+    paddingTop: 10    
+  },
   username: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#FFF',
   },
   email: {
+    fontSize: 14,
+    color: '#FFF',
+    marginTop: 2,
+  },
+  balance: {
     fontSize: 16,
     color: '#FFF',
     marginTop: 5,
   },
-  optionsContainer: {
-    padding: 20,
-    width: '100%',
+  notificationContainer: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    padding: 3,
+    paddingHorizontal: 6,
+  },
+  notificationText: {
+    color: '#FFF',
+    fontSize: 12,
+  },
+ sellerModeContainer: {
+    position: 'relative',
+    top: 45,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+    paddingVertical: 10,
+    marginHorizontal: 20,
+    marginTop: -10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  sellerModeText: {
+    color: '#000',
+    marginRight: 10,
+
+    fontSize: 16,
+  },
+  scrollableContent: {
+    zIndex: 1,
+    paddingTop: 20,
+ 
+  },
+  section: {
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 10,
+    backgroundColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'grey',
   },
   optionButton: {
-    backgroundColor: '#FFF',
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'flex-start',
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  optionIcon: {
+    marginRight: 10,
   },
   optionText: {
-    color: '#333',
-    fontWeight: 'bold',
     fontSize: 16,
+    color: '#000',
   },
 });
 

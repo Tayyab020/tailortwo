@@ -9,6 +9,8 @@ const {
 } = require("../config/index");
 const BlogDTO = require("../dto/blog");
 const BlogDetailsDTO = require("../dto/blog-details");
+const Appointment = require('../models/appointment');
+const AppointmentDTO = require('../dto/appointment');
 const Comment = require("../models/comment");
 const path = require('path'); 
 const cloudinary = require("cloudinary").v2;
@@ -73,10 +75,10 @@ const blogController = {
         // Handle database save error
         return res.status(500).json({ error: 'Failed to save blog to database' });
       }
-    },
+  },
   async getAll(req, res, next) {
     try {
-      const blogs = await Blog.find({}).populate('author', 'username');
+      const blogs = await Blog.find({}).populate('author', 'username profileImage');
       const blogsDto = blogs.map(blog => new BlogDTO(blog));
       return res.status(200).json({ blogs: blogsDto });
     } catch (error) {

@@ -1,162 +1,177 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.71.160:3000",
+  baseURL: "http://192.168.3.160:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// Utility function to handle errors
+const handleError = (error) => {
+  const errorMessage = error.response && error.response.data && error.response.data.message 
+    ? error.response.data.message 
+    : error.message;
+
+  throw new Error(errorMessage);
+};
 
 export const login = async (data) => {
-  let response;
-
   try {
-    response = await api.post("/login", data);
+    const response = await api.post("/login", data);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const signup = async (data) => {
-  let response;
-
   try {
-    response = await api.post("/register", data);
+    const response = await api.post("/register", data);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-  console.log(response);
-  return response;
 };
 
 export const signout = async () => {
-  let response;
   try {
-    response = await api.post("/logout");
+    const response = await api.post("/logout");
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const getAllBlogs = async () => {
-  let response;
-
   try {
-    response = await api.get("/blog/all");
-    console.log(response);
-  } catch (error) {}
-
-  return response;
+    const response = await api.get("/blog/all");
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
 };
 
 export const submitBlog = async (data) => {
-  let response;
-
   try {
-    response = await api.post("/blog", data);
+    const response = await api.post("/blog", data);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const getBlogById = async (id) => {
-  let response;
-
   try {
-    response = await api.get(`/blog/${id}`);
+    const response = await api.get(`/blog/${id}`);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const getCommentsById = async (id) => {
-  let response;
-
   try {
-    response = await api.get(`/comment/${id}`, {
+    const response = await api.get(`/comment/${id}`, {
       validateStatus: false,
     });
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const postComment = async (data) => {
-  let response;
-
   try {
-    response = await api.post("/comment", data);
+    const response = await api.post("/comment", data);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-  return response;
 };
 
 export const deleteBlog = async (id) => {
-  let response;
   try {
-    response = await api.delete(`/blog/${id}`);
+    const response = await api.delete(`/blog/${id}`);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-
-  return response;
 };
 
 export const updateBlog = async (data) => {
-  let response;
   try {
-    response = await api.put("/blog", data);
+    const response = await api.put("/blog", data);
+    return response;
   } catch (error) {
-    return error;
+    handleError(error);
   }
-  return response;
 };
 
-// auto token refresh
+export const updateProfileImage = async (id, profileImage) => {
+  try {
+      console.log('API ma a gyaa', id, profileImage);
+      const response = await api.post(`/updateProfileImage/${id}`, { profileImage }); // Ensure profileImage is sent as an object
+      return response;
+  } catch (error) {
+      console.error('Error in API call:', error); // Add this for debugging
+      handleError(error);
+  }
+};
 
-// /protected-resource -> 401
-// /refresh -> authenthicated state
-// /protected-resource
+export const getProfileImage = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/profile-image`);
+    return response; 
+  } catch (error) {
+    handleError(error);
+    return { status: error.response?.status || 500, data: { profileImage: null } };
+  }
+};
 
+export const createAppointment = async (data) => {
+  try {
+    const response = await api.post("/appointments", data);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const getAppointment = async (tailorId) => {
+  try {
+    const response = await api.get(`/appointment/${tailorId}`);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
+
+// Axios interceptor for auto token refresh
 api.interceptors.response.use(
-  (config) => config,
+  (response) => response,
   async (error) => {
     const originalReq = error.config;
-
-    // extract the value of message from json response if it exists
     const errorMessage = error.response && error.response.data && error.response.data.message;
 
     if (
       errorMessage === 'Unauthorized' &&
-			(error.response.status === 401 || error.response.status === 500) &&
-			originalReq &&
-			!originalReq._isRetry
+      (error.response.status === 401 || error.response.status === 500) &&
+      originalReq &&
+      !originalReq._isRetry
     ) {
       originalReq._isRetry = true;
 
       try {
-        await axios.get(`${process.env.REACT_APP_INTERNAL_API_PATH}/refresh`, {
-          withCredentials: true,
-        });
-
+        await api.get("/refresh", { withCredentials: true });
         return api.request(originalReq);
       } catch (error) {
-        return error;
+        handleError(error);
       }
     }
-    throw error;
+    handleError(error);
   }
 );

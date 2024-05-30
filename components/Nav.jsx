@@ -11,6 +11,8 @@ import SignUp from './SignUp'
 import Orders from './Orders'
 import BottomTab from './Tab';
 import creategigs from './creategig'
+import updategig from './Updategig'
+import Gigdetail from './Gigdetail'
 
 import Home from './Home';
 
@@ -28,6 +30,9 @@ const Nav = () => {
         <Stack.Screen name='Orders' component={Orders}/>
 
         <Stack.Screen name='creategig' component={creategigs}/>
+        <Stack.Screen name='updategig' component={updategig}/>
+        <Stack.Screen name='Gigdetail' component={Gigdetail}/>
+        
 
         {/* <Stack.Screen name='Home' component={Home}/> */}
     

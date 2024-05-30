@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, TextInput, Image, StyleSheet, TouchableOpacity, ToastAndroid, Text } from 'react-native';
 import { useSelector } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { submitBlog } from '../api/internal';
 
-const CreateBlog = () => {
+const Updategig = (props) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
   const author = useSelector((state) => state.user._id);
+
   const navigation = useNavigation();
+  const route = useRoute();
+  const { blog } = route.params;
+
+  useEffect(() => {
+    setContent(blog.content);
+    setTitle(blog.title);
+    setImage(blog.photoPath);
+  }, [blog]);
 
   const handleChoosePhoto = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.5, includeBase64: true });
@@ -23,7 +32,6 @@ const CreateBlog = () => {
 
   const handleSubmit = async () => {
     console.log('Submit button clicked');
-
     const blogData = {
       title,
       author,
@@ -31,7 +39,6 @@ const CreateBlog = () => {
       photoPath: image,
     };
     console.log('Blog data:', blogData);
-
     try {
       const response = await submitBlog(blogData);
       console.log('Response:', response.data);
@@ -57,7 +64,7 @@ const CreateBlog = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create a New Gig</Text>
+      <Text style={styles.title}>Update Gig</Text>
       <TextInput
         style={styles.input}
         placeholder="Title"
@@ -146,4 +153,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateBlog;
+export default Updategig;

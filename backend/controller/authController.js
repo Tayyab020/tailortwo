@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const UserDTO = require("../dto/user");
 const JWTService = require("../services/JWTService");
 const RefreshToken = require("../models/token");
+const cloudinary = require('cloudinary').v2;
 
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
@@ -75,8 +76,8 @@ const authController = {
 
       // token generation
 
-      accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
-      refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
+      accessToken = JWTService.signAccessToken({ _id: user._id }, "300000m");
+      refreshToken = JWTService.signRefreshToken({ _id: user._id }, "600000m");
 
       // res.status(200).json(
       //   {
@@ -165,8 +166,8 @@ const authController = {
       return next(error);
     }
 
-    const accessToken = JWTService.signAccessToken({ _id: user._id }, "30m");
-    const refreshToken = JWTService.signRefreshToken({ _id: user._id }, "60m");
+    const accessToken = JWTService.signAccessToken({ _id: user._id }, "300000m");
+    const refreshToken = JWTService.signRefreshToken({ _id: user._id }, "600000m");
 
     // update refresh token in database
     try {
@@ -182,12 +183,12 @@ const authController = {
     }
 
     res.cookie("accessToken", accessToken, {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
     });
 
     res.cookie("refreshToken", refreshToken, {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24 * 30,
       httpOnly: true,
     });
 
@@ -252,9 +253,9 @@ const authController = {
     }
 
     try {
-      const accessToken = JWTService.signAccessToken({ _id: id }, "30m");
+      const accessToken = JWTService.signAccessToken({ _id: id }, "300000m");
 
-      const refreshToken = JWTService.signRefreshToken({ _id: id }, "60m");
+      const refreshToken = JWTService.signRefreshToken({ _id: id }, "600000m");
 
       await RefreshToken.updateOne({ _id: id }, { token: refreshToken });
 
@@ -277,6 +278,51 @@ const authController = {
 
     return res.status(200).json({ user: userDto, auth: true });
   },
+  async updateProfileImage(req, res, next) {
+    console.log('Updating profile image');
+    const { id } = req.params;
+    console.log(id);
+
+    const { profileImage } = req.body;
+    //console.log(profileImage);
+    const schema = Joi.object({
+        profileImage: Joi.string().required(),
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) {
+        return next(error);
+    }
+
+    try {
+        const uploadResult = await cloudinary.uploader.upload(profileImage, { folder: 'profile_images' });
+        const photoUrl = uploadResult.secure_url;
+
+        await User.updateOne({ _id: id }, { profileImage: photoUrl });
+
+        const user = await User.findOne({ _id: id });
+        const userDto = new UserDTO(user);
+
+        return res.status(200).json({ user: userDto, auth: true });
+    } catch (error) {
+        return next(error);
+    }
+},
+
+  async getProfileImage(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json({ profileImage: user.profileImage });
+    } catch (error) {
+      return next(error);
+    }
+  }
+  
 };
+
 
 module.exports = authController;
