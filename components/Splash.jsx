@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, View, StyleSheet, Image, Text} from 'react-native';
+import {ActivityIndicator, View, StyleSheet, Image, Text,StatusBar} from 'react-native';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../store/userSlice';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const SplashScreen = props => {
   // const [isAuthenticated,setisAuthenticated]=useState(false)
   //  const getData=async()=>{
@@ -26,6 +27,7 @@ const SplashScreen = props => {
 
   return (
     <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent"  />
       <Image
         source={require('../assets/tailorlogo.png')}
         style={{width: '80%', resizeMode:'contain', margin: 0}}

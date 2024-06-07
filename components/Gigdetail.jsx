@@ -19,6 +19,27 @@ const GigDetail = ({ route }) => {
 
   const customer = useSelector((state) => state.user._id);
 
+  // useEffect(() => {
+  //   const fetchProfileImage = async () => {
+  //     try {
+  //       const response = await getProfileImage(user._id);
+  //       if (response.status === 200) {
+  //         setProfileImage(response.data.profileImage);
+  //       } else {
+  //         console.error('Failed to fetch profile image, status:', response.status);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching profile image:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (user && user._id) {
+  //     fetchProfileImage();
+  //   }
+  // }, [user]);
+
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === 'ios');
@@ -79,7 +100,7 @@ const GigDetail = ({ route }) => {
       <View style={styles.contentContainer}>
         <View style={styles.profileContainer}>
           <Image 
-            source={{ uri: blog.photoPath }} 
+            source={{ uri: blog.authorPhotoPath }} 
             style={styles.profileImage} 
           />
           <Text style={styles.username}>{blog.username}</Text>

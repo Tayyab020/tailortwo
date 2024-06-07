@@ -102,7 +102,7 @@ const Profile = () => {
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={handleChoosePhoto}>
             {profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.profileImage} />
+              <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
             ) : (
               <View style={styles.profileImagePlaceholder}>
                 <Text style={styles.profileImagePlaceholderText}>Upload Photo</Text>

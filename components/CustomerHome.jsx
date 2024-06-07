@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, ToastAndroid } from 'react-native';
-import { FAB, Menu, Provider } from 'react-native-paper';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { FAB, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { getAllBlogs, deleteBlog } from '../api/internal';
-
+import { useSelector, useDispatch } from 'react-redux';
 const CustomerHome = () => {
+  const user = useSelector((state) => state.user);
   const [blogs, setBlogs] = useState([]);
   const [visibleMenus, setVisibleMenus] = useState({});
 
@@ -21,7 +22,7 @@ const CustomerHome = () => {
     };
 
     fetchBlogs();
-  }, []);
+  },[]);
 
   const navigation = useNavigation();
 
@@ -54,29 +55,37 @@ const CustomerHome = () => {
 
   return (
     <Provider>
-      <View style={styles.container}>
-      <View style={styles.banner}>
-            <Text style={styles.bannerText}>The Fastest In Delivery Food</Text>
-            <TouchableOpacity style={styles.orderButton}>
-              <Text style={styles.orderButtonText}>Order Now</Text>
-            </TouchableOpacity>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.header}>
+          <View>
+          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.location}>🌍 Location</Text>
+          </View>
+    
+          <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+        </View>
+        <View style={styles.searchBar}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search coffee"
+          />
+          <TouchableOpacity style={styles.searchButton}>
+            <Text style={styles.searchButtonText}>🔍</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.banner}>
+            <Text style={styles.bannerText}>Buy one get one Free</Text>
           </View>
         <ScrollView style={styles.scrollView}>
-          
-         
-          <View style={styles.popularSection}>
-            <Text style={styles.sectionTitle}>Popular Now</Text>
-          
-          </View>
+    
           <View style={styles.popularItems}>
             {blogs.map((blog, index) => (
               <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
                 <Image source={{ uri: blog.photoPath }} style={styles.itemImage} />
                 <View style={styles.cardDetail}>
-                <Text style={styles.itemTitle}>{blog.title}</Text>
-                <Text style={styles.itemPrice}>${blog.price}</Text>
+                  <Text style={styles.itemTitle}>{blog.title}</Text>
+                  <Text style={styles.itemPrice}>${blog.price}</Text>
                 </View>
-                
               </TouchableOpacity>
             ))}
           </View>
@@ -87,7 +96,7 @@ const CustomerHome = () => {
           color="#EEF6D5"
           onPress={navigateToCreate}
         />
-      </View>
+      </KeyboardAvoidingView>
     </Provider>
   );
 };
@@ -96,37 +105,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding:6
+    padding: 6
   },
-
-
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 30,
+    backgroundColor: '#f8f8f8',
+    height: 100,
+  },
+ username :{
+  color: 'black',
+  fontWeight:'bold',
+  margin:6
+  },
+  location: {
+    fontSize: 16,
+    color: '#333',
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  searchInput: {
+    flex: 1,
+    padding: 10,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  searchButton: {
+    backgroundColor: '#333',
+    padding: 10,
+    borderRadius: 8,
+  },
+  searchButtonText: {
+    color: '#fff',
+    
+  },
   scrollView: {
     flex: 1,
   },
   banner: {
-    padding: 30,
-    backgroundColor: 'grey',
+    padding: 20,
+    backgroundColor: '#wF8FAFB',
     borderRadius: 10,
     alignItems: 'center',
-    height:150,
+    margin: 6,
+    height: 150,
   },
   bannerText: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 10,
   },
-
-  popularSection: {
+  tabs: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    justifyContent: 'space-around',
     padding: 10,
   },
-  sectionTitle: {
-    fontSize: 18,
+  tab: {
+    fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#333',
   },
   popularItems: {
     flexDirection: 'row',
@@ -136,22 +185,20 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '45%',
     marginVertical: 10,
-    backgroundColor: '#EEF6D5',
+    backgroundColor: '#F8FAFB',
     borderRadius: 10,
     alignItems: 'center',
     padding: 10,
   },
-  cardDetail:{
+  cardDetail: {
     flex: 1,
   },
   itemImage: {
     width: '100%',
-    height:200,
+    height: 200,
     borderRadius: 10,
     resizeMode: 'cover',
   },
-  
-  
   itemTitle: {
     marginTop: 6,
     fontSize: 16,

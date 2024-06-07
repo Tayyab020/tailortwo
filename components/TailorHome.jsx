@@ -4,6 +4,7 @@ import { FAB, Menu, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { getAllBlogs, deleteBlog } from '../api/internal';
 import { useSelector } from 'react-redux';
+
 const TailorHome = () => {
   const [blogs, setBlogs] = useState([]);
   const [visibleMenus, setVisibleMenus] = useState({});
