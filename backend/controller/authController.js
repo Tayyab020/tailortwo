@@ -9,6 +9,7 @@ const cloudinary = require('cloudinary').v2;
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
+
   async register(req, res, next) {
     console.log(req.body);
     // 1. validate user input
@@ -18,6 +19,8 @@ const authController = {
       email: Joi.string().email().required(),
       password: Joi.string().pattern(passwordPattern).required(),
       confirmPassword: Joi.ref("password"),
+      isTailor: Joi.boolean().default(false),
+     
     });
     const { error } = userRegisterSchema.validate(req.body);
 
@@ -70,6 +73,7 @@ const authController = {
         email,
         // name,
         password: hashedPassword,
+        isTailor:false
       });
 
       user = await userToRegister.save();
@@ -110,7 +114,6 @@ const authController = {
 
     return res.status(200).json({ user: user, auth: true });
   },
-  
   async login(req, res, next) {
     // 1. validate user input
     // 2. if validation error, return error
@@ -118,6 +121,7 @@ const authController = {
     // 4. return response
 
     // we expect input data to be in such shape
+    
     const userLoginSchema = Joi.object({
       username: Joi.string().min(5).max(30).required(),
       password: Joi.string().pattern(passwordPattern),
@@ -307,8 +311,7 @@ const authController = {
     } catch (error) {
         return next(error);
     }
-},
-
+  },
   async getProfileImage(req, res, next) {
     try {
       const { userId } = req.params;
@@ -320,7 +323,7 @@ const authController = {
     } catch (error) {
       return next(error);
     }
-  }
+  },
   
 };
 

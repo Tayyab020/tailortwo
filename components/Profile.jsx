@@ -1,28 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView, Switch, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signout } from '../api/internal';
-import { resetUser } from '../store/userSlice';
+import { resetUser, setUser } from '../store/userSlice';
 import { updateProfileImage, getProfileImage } from '../api/internal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-
-import { StatusBar } from 'react-native';
 const Profile = () => {
-  
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const user = useSelector((state) => state.user);
-  //StatusBar.setHidden(true, 'none');
-  StatusBar.setBackgroundColor('transparent');
-  
+
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sellerMode, setSellerMode] = useState(true);
-  const [notifications, setNotifications] = useState(2); // Example notification count
+  const [sellerMode, setSellerMode] = useState(user.isTailor);
+  const [notifications, setNotifications] = useState(2);
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -56,7 +51,7 @@ const Profile = () => {
         const response = await updateProfileImage(user._id, base64);
         if (response.status === 200) {
           const updatedUser = { ...user, profileImage: base64 };
-          dispatch(resetUser(updatedUser));
+          dispatch(setUser(updatedUser)); 
           await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
         }
       } catch (error) {
@@ -80,7 +75,8 @@ const Profile = () => {
               _id: "",
               email: "",
               username: "",
-              auth: false
+              auth: false,
+              isTailor: false,
             };
             await AsyncStorage.setItem('user', JSON.stringify(resetUserData));
 
@@ -92,11 +88,16 @@ const Profile = () => {
     );
   };
 
-  return (
-    
-    <View style={styles.container}>
-    <StatusBar translucent backgroundColor="transparent" />
+  const handleSellerModeToggle = async (value) => {
+    setSellerMode(value);
+    const updatedUser = { ...user, isTailor: value };
+    dispatch(setUser(updatedUser));
+    await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+  };
 
+  return (
+    <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" />
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={handleChoosePhoto}>
@@ -125,13 +126,12 @@ const Profile = () => {
           <Text style={styles.sellerModeText}>Seller Mode</Text>
           <Switch
             value={sellerMode}
-            onValueChange={(value) => setSellerMode(value)}
+            onValueChange={handleSellerModeToggle}
             trackColor={{ false: "#767577", true: "#81b0ff" }}
             thumbColor={sellerMode ? "#f5dd4b" : "#f4f3f4"}
           />
         </View>
       </View>
-      
       <ScrollView contentContainerStyle={styles.scrollableContent}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Selling</Text>

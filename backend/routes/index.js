@@ -74,4 +74,6 @@ router.post('/comment', auth, commentController.create);
 // get 
 router.get('/comment/:id', auth, commentController.getById);
 
+
+
 module.exports = router;

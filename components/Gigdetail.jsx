@@ -4,6 +4,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { createAppointment } from '../api/internal';
+import { FontAwesome } from '@expo/vector-icons';
+
+import { useNavigation } from '@react-navigation/native';
 
 const GigDetail = ({ route }) => {
   const { blog } = route.params;
@@ -57,6 +60,13 @@ const GigDetail = ({ route }) => {
     }
   };
 
+  const navigation = useNavigation();
+
+  const navigateToMessages = () => {
+    navigation.navigate('Gigdetail');
+  };
+
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -103,6 +113,9 @@ const GigDetail = ({ route }) => {
           </View>
         )}
       </View>
+      {/* <TouchableOpacity style={styles.chatIcon} onPress={navigateToMessages}>
+        <Icon name="chatbubble-outline" size={30} color="#000" />
+      </TouchableOpacity> */}
     </View>
   );
 };
@@ -180,6 +193,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
+  },
+  chatIcon: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    padding: 10,
+    elevation: 5,
   },
 });
 

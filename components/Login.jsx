@@ -510,6 +510,7 @@ const LoginSchema = Yup.object().shape({
                   email: response.data.user.email,
                   username: response.data.user.username,
                   auth: response.data.auth,
+                  isTailored: response.data.isTailor
                 };
 
                

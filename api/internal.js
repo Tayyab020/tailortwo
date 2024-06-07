@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.3.160:3000",
+  baseURL: "http://192.168.180.160:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -148,7 +148,25 @@ export const getAppointment = async (tailorId) => {
   }
 };
 
+export const getAllChats = async () => {
+  return await api.get('/chats');
+};
 
+export const getChatById = async (chatId) => {
+  return await api.get(`/chats/${chatId}`);
+};
+
+export const sendMessage = async (chatId, message) => {
+  return await api.post(`/chats/${chatId}/messages`, { message });
+};
+export const getChats = async () => {
+  try {
+    const response = await api.get("/chats");
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
 
 // Axios interceptor for auto token refresh
 api.interceptors.response.use(

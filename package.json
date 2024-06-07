@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
+    "@fortawesome/react-native-fontawesome": "^0.3.2",
     "@hookform/resolvers": "^3.3.4",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "^8.0.1",
@@ -29,6 +34,7 @@
     "expo-blur": "^12.9.1",
     "expo-font": "^11.10.2",
     "expo-image-picker": "^15.0.5",
+    "expo-navigation-bar": "~3.0.4",
     "express": "^4.18.2",
     "formik": "^2.4.5",
     "jsonwebtoken": "^9.0.2",
@@ -51,11 +57,13 @@
     "react-native-safe-area-context": "^4.9.0",
     "react-native-screens": "^3.29.0",
     "react-native-star-rating": "^1.1.0",
+    "react-native-svg": "^15.3.0",
+    "react-native-system-navigation-bar": "^2.6.4",
     "react-native-toast-message": "^2.2.0",
-    "react-native-vector-icons": "^10.0.3",
+    "react-native-vector-icons": "^10.1.0",
     "react-redux": "^9.1.2",
-    "yup": "^1.4.0",
-    "expo-navigation-bar": "~3.0.4"
+    "socket.io-client": "^4.7.5",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

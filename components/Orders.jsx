@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import axios from 'axios';
-
-import { useSelector, useDispatch } from 'react-redux';
-import { getAppointment } from '../api/internal';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import {useSelector} from 'react-redux';
+import {getAppointment } from '../api/internal';
+import {StatusBar} from 'react-native';
 
 const AppointmentCard = ({ appointment }) => {
+  
   return (
     <TouchableOpacity style={styles.appointmentCard}>
       <View style={styles.customerContainer}>
+      <StatusBar hidden={true} />
         <Image
           source={{ uri: appointment.customer.profileImage }}
           style={styles.customerProfilePhoto}
