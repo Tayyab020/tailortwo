@@ -6,7 +6,8 @@ const initialState = {
   username: "",
   auth: false,
   isTailor: false,
-  profileImage: null, // Initially null
+  profileImage: null,
+  location: null // Initially null, can be updated later
 };
 
 console.log("Initial state:", initialState);
@@ -17,7 +18,7 @@ export const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       if (action.payload) {
-        const { _id, email, username, auth, isTailor, profileImage } = action.payload;
+        const { _id, email, username, auth, isTailor, profileImage, location } = action.payload;
         console.log("setUser payload:", action.payload);
 
         state._id = _id !== undefined ? _id : state._id;
@@ -26,11 +27,12 @@ export const userSlice = createSlice({
         state.auth = auth !== undefined ? auth : state.auth;
         state.isTailor = isTailor !== undefined ? isTailor : state.isTailor;
         state.profileImage = profileImage !== undefined ? profileImage : state.profileImage;
+        state.location = location !== undefined ? location : state.location;
       } else {
         console.log("setUser called with no payload");
       }
     },
-    
+
     resetUser: (state) => {
       state._id = "";
       state.email = "";
@@ -38,13 +40,18 @@ export const userSlice = createSlice({
       state.auth = false;
       state.isTailor = false;
       state.profileImage = null;
+      state.location = null;
     },
 
     updateProfileImage: (state, action) => {
       state.profileImage = action.payload;
     },
+
+    updateLocation: (state, action) => {
+      state.location = action.payload;
+    }
   },
 });
 
-export const { setUser, resetUser, updateProfileImage } = userSlice.actions;
+export const { setUser, resetUser, updateProfileImage, updateLocation } = userSlice.actions;
 export default userSlice.reducer;

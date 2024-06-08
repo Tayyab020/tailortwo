@@ -3,6 +3,8 @@ const authController = require('../controller/authController');
 const blogController = require('../controller/blogController');
 const commentController = require('../controller/commentController');
 const appointmentController = require('../controller/appointmentController');
+const locationController = require('../controller/locationController');
+
 const auth = require('../middlewares/auth');
 
 const router = express.Router();
@@ -32,6 +34,9 @@ router.post('/updateProfileImage/:id', auth, authController.updateProfileImage);
 
 // get profile img
 router.get('/users/:userId/profile-image', auth, authController.getProfileImage);
+
+//location
+router.post('/save-location', auth, locationController.saveLocation); // Add this line
 
 // blog
 

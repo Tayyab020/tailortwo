@@ -102,7 +102,7 @@ const Profile = () => {
         <View style={styles.headerTop}>
           <TouchableOpacity onPress={handleChoosePhoto}>
             {profileImage ? (
-              <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+              <Image source={{ uri: profileImage }} style={styles.profileImage} />
             ) : (
               <View style={styles.profileImagePlaceholder}>
                 <Text style={styles.profileImagePlaceholderText}>Upload Photo</Text>
@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     paddingTop:20,
   },
   profileImage: {
-   
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -215,7 +214,6 @@ const styles = StyleSheet.create({
     marginTop:10
   },
   profileImagePlaceholder: {
-
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -225,7 +223,6 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   profileImagePlaceholderText: {
-    
     color: '#FFF',
     fontWeight: 'bold',
     textAlign: 'center',
@@ -267,7 +264,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 12,
   },
- sellerModeContainer: {
+  sellerModeContainer: {
     position: 'relative',
     top: 45,
     flexDirection: 'row',
@@ -289,13 +286,11 @@ const styles = StyleSheet.create({
   sellerModeText: {
     color: '#000',
     marginRight: 10,
-
     fontSize: 16,
   },
   scrollableContent: {
     zIndex: 1,
     paddingTop: 20,
- 
   },
   section: {
     paddingHorizontal: 20,

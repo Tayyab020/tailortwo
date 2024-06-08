@@ -1,14 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import {  Button, ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, ToastAndroid, Dimensions } from 'react-native';
 import { FAB, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { getAllBlogs, deleteBlog } from '../api/internal';
+import Swiper from 'react-native-swiper';
+import { getAllBlogs, deleteBlog, getProfileImage } from '../api/internal';
 import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../store/userSlice';
+
+const { width: screenWidth } = Dimensions.get('window');
+
 const CustomerHome = () => {
   const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [blogs, setBlogs] = useState([]);
   const [visibleMenus, setVisibleMenus] = useState({});
+  const [profileImage, setProfileImage] = useState(user.profileImage);
+  const [imageHeights, setImageHeights] = useState({});
 
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const response = await getProfileImage(user._id);
+        if (response.status === 200) {
+          setProfileImage(response.data.profileImage);
+          dispatch(setUser({ ...user, profileImage: response.data.profileImage }));
+        } else {
+          console.error('Failed to fetch profile image, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    };
+
+    if (!user.profileImage && user._id) {
+      fetchProfileImage();
+    }
+  }, [user, dispatch]);
+  
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -22,7 +51,23 @@ const CustomerHome = () => {
     };
 
     fetchBlogs();
-  },[]);
+  }, []);
+
+  useEffect(() => {
+    const getImageHeights = () => {
+      tailorImages.forEach((image, index) => {
+        Image.getSize(image, (width, height) => {
+          const imageHeight = (screenWidth * height) / width;
+          setImageHeights((prevHeights) => ({
+            ...prevHeights,
+            [index]: imageHeight,
+          }));
+        });
+      });
+    };
+
+    getImageHeights();
+  }, []);
 
   const navigation = useNavigation();
 
@@ -36,6 +81,10 @@ const CustomerHome = () => {
 
   const navigateToCreate = () => {
     navigation.navigate('creategig');
+  };
+
+  const navigateToLocationSelection = () => {
+    navigation.navigate('LocationSelection');
   };
 
   const handleDelete = async (blogId) => {
@@ -53,31 +102,46 @@ const CustomerHome = () => {
 
   const defaultProfileImage = 'https://www.example.com/default-profile.png'; // Replace with actual URL of your default image
 
+  const tailorImages = [
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830544/slider/jp1ebbik8klez1dq3y7y.webp', // Replace with actual URLs of your images
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830545/slider/orzdveh8glctpartijt1.webp',
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830543/slider/gmroyd8yerkri7corkmt.webp'
+  ];
+
   return (
     <Provider>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.header}>
           <View>
-          <Text style={styles.username}>{user.username}</Text>
-          <Text style={styles.location}>🌍 Location</Text>
+            <Text style={styles.username}>{user.username}</Text>
+
+            <TouchableOpacity onPress={navigateToLocationSelection} >
+            <Text style={styles.location}>🌍 Location</Text>
+            </TouchableOpacity>
+            
           </View>
-    
-          <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+          <Image
+            source={{ uri: profileImage ? profileImage : defaultProfileImage }}
+            style={styles.profileImage}
+          />
         </View>
         <View style={styles.searchBar}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search coffee"
+            placeholder="Search Tailor"
           />
           <TouchableOpacity style={styles.searchButton}>
             <Text style={styles.searchButtonText}>🔍</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.banner}>
-            <Text style={styles.bannerText}>Buy one get one Free</Text>
-          </View>
+        <Swiper style={styles.wrapper} showsButtons={false} autoplay={true} autoplayTimeout={3}>
+          {tailorImages.map((image, index) => (
+            <View key={index} style={[styles.slide, { height: imageHeights[index] || 0 }]}>
+              <Image source={{ uri: image }} style={styles.slideImage} />
+            </View>
+          ))}
+        </Swiper>
         <ScrollView style={styles.scrollView}>
-    
           <View style={styles.popularItems}>
             {blogs.map((blog, index) => (
               <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
@@ -105,20 +169,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 6
+    
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 30,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#FF7F11',
     height: 100,
+    margin: 0,
   },
- username :{
-  color: 'black',
-  fontWeight:'bold',
-  margin:6
+  username: {
+    color: 'black',
+    fontWeight: 'bold',
+    margin: 6,
   },
   location: {
     fontSize: 16,
@@ -132,7 +197,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: 6,
   },
   searchInput: {
     flex: 1,
@@ -140,7 +205,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderWidth: 1,
     borderRadius: 8,
-    marginRight: 10,
+    margin: 6,
   },
   searchButton: {
     backgroundColor: '#333',
@@ -149,33 +214,20 @@ const styles = StyleSheet.create({
   },
   searchButtonText: {
     color: '#fff',
-    
+  },
+  wrapper: {
+   
+  },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slideImage: {
+    width: '100%',
+    height: '100%',
   },
   scrollView: {
     flex: 1,
-  },
-  banner: {
-    padding: 20,
-    backgroundColor: '#wF8FAFB',
-    borderRadius: 10,
-    alignItems: 'center',
-    margin: 6,
-    height: 150,
-  },
-  bannerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  tabs: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10,
-  },
-  tab: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
   },
   popularItems: {
     flexDirection: 'row',

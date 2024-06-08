@@ -1,4 +1,4 @@
-import axios from "axios";
+ import axios from "axios";
 
 const api = axios.create({
   baseURL: "http://192.168.180.160:3000",
@@ -127,6 +127,15 @@ export const getProfileImage = async (userId) => {
   } catch (error) {
     handleError(error);
     return { status: error.response?.status || 500, data: { profileImage: null } };
+  }
+};
+
+export const saveLocation = async (userId, location) => {
+  try {
+    const response = await api.post('/save-location', { userId, location });
+    return response;
+  } catch (error) {
+    handleError(error);
   }
 };
 
