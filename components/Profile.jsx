@@ -4,9 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signout } from '../api/internal';
+import { signout, updateProfileImage, getProfileImage } from '../api/internal';
 import { resetUser, setUser } from '../store/userSlice';
-import { updateProfileImage, getProfileImage } from '../api/internal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Profile = () => {
@@ -68,19 +67,26 @@ const Profile = () => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Yes', onPress: async () => {
-            await signout();
-            dispatch(resetUser());
+            try {
+              await signout();
+              dispatch(resetUser());
 
-            const resetUserData = {
-              _id: "",
-              email: "",
-              username: "",
-              auth: false,
-              isTailor: false,
-            };
-            await AsyncStorage.setItem('user', JSON.stringify(resetUserData));
+              const resetUserData = {
+                _id: "",
+                email: "",
+                username: "",
+                auth: false,
+                isTailor: false,
+              };
+              await AsyncStorage.setItem('user', JSON.stringify(resetUserData));
 
-            navigation.navigate('Home');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+              });
+            } catch (error) {
+              console.error('Logout failed', error);
+            }
           }
         },
       ],
@@ -113,14 +119,6 @@ const Profile = () => {
             <Text style={styles.username}>{user.username}</Text>
             <Text style={styles.email}>{user.email}</Text>
           </View>
-          <View style={styles.notificationContainer}>
-            <Icon name="bell" size={25} color="#FFF" />
-            {notifications > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationText}>{notifications}</Text>
-              </View>
-            )}
-          </View>
         </View>
         <View style={styles.sellerModeContainer}>
           <Text style={styles.sellerModeText}>Seller Mode</Text>
@@ -134,50 +132,9 @@ const Profile = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollableContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Selling</Text>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="dollar" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Earnings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="users" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Buyer Requests</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="file-text" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Custom Offer Templates</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="share" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Share My Gigs</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>General</Text>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="cog" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Settings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="user" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>My Profile</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.optionButton}>
             <Icon name="circle" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Online Status</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="credit-card" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Payments</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="users" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Invite Friends</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="support" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Support</Text>
+            <Text style={styles.optionText}>Set Availability</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
             <Icon name="sign-out" size={20} color="#333" style={styles.optionIcon} />

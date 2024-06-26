@@ -9,13 +9,13 @@ const TailorHome = () => {
   const [blogs, setBlogs] = useState([]);
   const [visibleMenus, setVisibleMenus] = useState({});
   const id = useSelector(state => state.user._id);
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const response = await getAllBlogs();
         if (response.status === 200) {
           setBlogs(response.data.blogs);
-          console.log(" blogs a gyeee ", response.data.blogs);
         }
       } catch (error) {
         console.error('Failed to fetch blogs:', error);
@@ -105,67 +105,60 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 10,
-    paddingTop: 0,
-    paddingBottom: 0,
-    width: '100%',
-    overflow: 'hidden',
+    backgroundColor: '#F5F5F5',
   },
   scrollView: {
     width: '100%',
-    height: '100%',
   },
   cardContainer: {
-    margin: 8,
-    backgroundColor: '#EEF6D5',
+    margin: 10,
+    backgroundColor: '#fff',
     borderRadius: 10,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
+    overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
     elevation: 5,
   },
   imageContainer: {
     width: '100%',
     height: 200,
-    marginBottom: 10,
+    backgroundColor: '#e0e0e0',
   },
   image: {
     width: '100%',
     height: '100%',
-    borderTopRightRadius: 10,
-    borderTopLeftRadius: 10,
   },
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
   },
   profileImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    marginLeft: 10,
-    marginRight: 10,
   },
   username: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#333',
+    marginLeft: 10,
     flex: 1,
   },
   menuDots: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
-    padding: 10,
+    color: '#333',
   },
   title: {
-    color: 'black',
     fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
     margin: 10,
-    textAlign: 'left',
   },
   fab: {
     position: 'absolute',

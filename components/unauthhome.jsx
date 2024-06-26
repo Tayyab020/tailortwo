@@ -1,142 +1,231 @@
-
-import React from 'react';
-import { ScrollView,View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useState, useEffect } from 'react';
-import {Button} from 'react-native';
-import { Icon,FAB, Card } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import {
+  ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput,
+  KeyboardAvoidingView, Platform, ToastAndroid, Dimensions
+} from 'react-native';
+import {  Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { getAllBlogs } from "../api/internal";
-import axios from 'axios';
+import Swiper from 'react-native-swiper';
+import { getAllBlogs, deleteBlog, getProfileImage } from '../api/internal';
+import { useSelector, useDispatch } from 'react-redux';
+import { setUser } from '../store/userSlice';
 
+const { width: screenWidth } = Dimensions.get('window');
 
-import store from '../store/store'; // Import the store
-const currentState = store.getState();
-console.log(currentState);
-
-const Home = () => {
+const Unauthhome = () => {
+  const user = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [blogs, setBlogs] = useState([]);
+  const [profileImage, setProfileImage] = useState(user.profileImage);
+  const [imageHeights, setImageHeights] = useState({});
 
   useEffect(() => {
-    const fetchGigs = async () => {
+    const fetchProfileImage = async () => {
       try {
-        const response = await getAllBlogs()
-        // console.log(response);
-        
+        const response = await getProfileImage(user._id);
+        if (response.status === 200) {
+          setProfileImage(response.data.profileImage);
+          dispatch(setUser({ ...user, profileImage: response.data.profileImage }));
+        } else {
+          console.error('Failed to fetch profile image, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    };
+
+    if (!user.profileImage && user._id) {
+      fetchProfileImage();
+    }
+  }, [user, dispatch]);
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const response = await getAllBlogs();
         if (response.status === 200) {
           setBlogs(response.data.blogs);
         }
       } catch (error) {
-        console.error('Failed to fetch gigs:', error);
-        // Handle error gracefully, such as displaying a message to the user
+        console.error('Failed to fetch blogs:', error);
       }
     };
 
-    fetchGigs([]);
+    fetchBlogs();
+  }, []);
+
+  useEffect(() => {
+    const getImageHeights = () => {
+      tailorImages.forEach((image, index) => {
+        Image.getSize(image, (width, height) => {
+          const imageHeight = (screenWidth * height) / width;
+          setImageHeights((prevHeights) => ({
+            ...prevHeights,
+            [index]: imageHeight,
+          }));
+        });
+      });
+    };
+
+    getImageHeights();
   }, []);
 
   const navigation = useNavigation();
-  
- 
 
-  const navigateToOrder = () => {
-    navigation.navigate('creategig');
+  const navigateToLogin = () => {
+    navigation.navigate('Login');
   };
+
+
+
+
+  const defaultProfileImage = 'https://www.example.com/default-profile.png'; // Replace with actual URL of your default image
+
+  const tailorImages = [
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830544/slider/jp1ebbik8klez1dq3y7y.webp', // Replace with actual URLs of your images
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830545/slider/orzdveh8glctpartijt1.webp',
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830543/slider/gmroyd8yerkri7corkmt.webp'
+  ];
+
   return (
-    <View style={styles.container}>
+    <Provider>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.username}>{user.username}</Text>
+          </View>
+          <Image
+            source={{ uri: profileImage ? profileImage : defaultProfileImage }}
+            style={styles.profileImage}
+          />
+        </View>
+       
+        <View style={styles.swiperContainer}>
+          <Swiper style={styles.wrapper} showsButtons={false} autoplay={true} autoplayTimeout={3}>
+            {tailorImages.map((image, index) => (
+              <View key={index} style={[styles.slide, { height: imageHeights[index] || 200 }]}>
+                <Image source={{ uri: image }} style={styles.slideImage} />
+              </View>
+            ))}
+          </Swiper>
+        </View>
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.popularItems}>
+            {blogs.map((blog, index) => (
+                <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToLogin()}>
+                
+                <Image source={{ uri: blog.photoPath }} style={styles.itemImage} />
+                
+                <View style={styles.cardDetail}>
+                  <Text style={styles.itemTitle}>{blog.title}</Text>
+                  <Text style={styles.itemPrice}>Rs. 1500 {blog.price}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
       
-<ScrollView style={styles.ScrollView}>
-       {blogs.map((blog, index) => (
-         <TouchableOpacity  key={index} style={styles.cardcontainer}>
-         <View style={styles.imageContainer}>
-           {/* React Native doesn't support SVG directly like in web, so you might need to use an image or a library like react-native-svg */}
-           <Image  source={require('../assets/sewing-machine.png')}
-              style={styles.image} />
-         </View>
-         <Text style={styles.title}>{blog.title}</Text>
-         <Text style={styles.subtitle}>  {blog.content}.</Text>
-         <View style={styles.orderNowContainer}>
-           <Text style={styles.price}>$21.00</Text>
-           <TouchableOpacity style={styles.orderButton}>
-             <Text style={styles.orderButtonText}>Order Now</Text>
-           </TouchableOpacity>
-         </View>
-         </TouchableOpacity>
-       ))}
-         
-       </ScrollView>
-      
-    </View>
-  
+      </KeyboardAvoidingView>
+    </Provider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    padding: 10,
-    paddingTop:0,
-    paddingBottom: 0,
-    width:"100%",
-    overflow: 'hidden',
+    backgroundColor: '#F8F9FA',
   },
-  ScrollView: {
-    width:"100%",
-    height:"100%",
-  },
-  cardcontainer: {
-    margin: 8,
-    backgroundColor: '#EEF6D5',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  imageContainer: {
-    // Adjust your image container style
-  },
-  image: {
-    width: 124,
-    height: 124,
-    borderRadius: 62, // to make it round
-  },
-  title: {
-    color: '#FF7F11',
-    fontWeight: 'bold',
-    fontSize: 20,
-    marginTop: 10,
-  },
-  subtitle: {
-    color: '#808080',
-    fontSize: 14,
-    marginTop: 5,
-  },
-  orderNowContainer: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    marginTop: 10,
+    padding: 30,
+    backgroundColor: '#FF7F11',
   },
-  price: {
+  username: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  location: {
+    fontSize: 16,
+    color: '#fff',
+    marginTop: 4,
+  },
+  txt:{
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  swiperContainer: {
+    marginTop:8,
+    height: 250,
+    backgroundColor: '#FF7F11',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slideImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+  },
+  popularItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    padding: 6,
+  },
+  cardContainer: {
+    width: '45%',
+    marginVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+    padding: 10,
+  },
+  cardDetail: {
+    
+  },
+  itemImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+   
+  },
+  itemPrice: {
+    marginTop: 6,
     color: '#FF7F11',
     fontWeight: 'bold',
-  },
-  orderButton: {
-    backgroundColor: '#FF7F11',
-    padding: 10,
-    borderRadius: 20,
-  },
-  orderButtonText: {
-    color: '#EEF6D5',
-    fontWeight: 'bold',
+    alignItems: 'center',
   },
 
 });
 
-export default Home;
+export default Unauthhome;
+

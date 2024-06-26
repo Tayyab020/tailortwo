@@ -9,7 +9,10 @@ const PORT = 3000;
 
 const corsOptions = {
   credentials: true,
-  origin: ["http://10.0.2.2:8081"], // This should match the React Native development server URL
+  origin: ["http://localhost:3001", "http://10.0.2.2:8081"], // Allow both localhost and emulator
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 const app = express();

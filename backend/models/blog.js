@@ -6,7 +6,7 @@ const blogSchema = new Schema({
   content: { type: String, required: true },
   photoPath: { type: String, required: true },
   author: { type: mongoose.SchemaTypes.ObjectId, ref: 'User' },
-  authorPhotoPath: {  }
+  price: { type: Number, required: true },
 }, 
 { timestamps: true });
 

@@ -34,6 +34,7 @@ const blogController = {
         author: Joi.string().regex(mongodbIdPattern).required(),
         content: Joi.string().required(),
         photoPath: Joi.string().required(), // Ensure photo is base64 encoded
+        price: Joi.number().required(),
       });
   
       const { error } = createBlogSchema.validate(req.body);
@@ -42,7 +43,7 @@ const blogController = {
         return next(error);
       }
   
-      const { title, author, content, photoPath } = req.body;
+      const { title, author, content, photoPath,price } = req.body;
   
       // Upload photo to Cloudinary
       let photoUrl;
@@ -61,6 +62,7 @@ const blogController = {
           author,
           content,
           photoPath: photoUrl, // Store Cloudinary URL instead of local path
+          price
       
         });
   

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {  Button, ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, ToastAndroid, Dimensions } from 'react-native';
+import {
+  ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput,
+  KeyboardAvoidingView, Platform, ToastAndroid, Dimensions
+} from 'react-native';
 import { FAB, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import Swiper from 'react-native-swiper';
@@ -16,7 +19,6 @@ const CustomerHome = () => {
   const [visibleMenus, setVisibleMenus] = useState({});
   const [profileImage, setProfileImage] = useState(user.profileImage);
   const [imageHeights, setImageHeights] = useState({});
-
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -37,7 +39,7 @@ const CustomerHome = () => {
       fetchProfileImage();
     }
   }, [user, dispatch]);
-  
+
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
@@ -114,41 +116,32 @@ const CustomerHome = () => {
         <View style={styles.header}>
           <View>
             <Text style={styles.username}>{user.username}</Text>
-
-            <TouchableOpacity onPress={navigateToLocationSelection} >
-            <Text style={styles.location}>🌍 Location</Text>
-            </TouchableOpacity>
-            
           </View>
           <Image
             source={{ uri: profileImage ? profileImage : defaultProfileImage }}
             style={styles.profileImage}
           />
         </View>
-        <View style={styles.searchBar}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search Tailor"
-          />
-          <TouchableOpacity style={styles.searchButton}>
-            <Text style={styles.searchButtonText}>🔍</Text>
-          </TouchableOpacity>
+       
+        <View style={styles.swiperContainer}>
+          <Swiper style={styles.wrapper} showsButtons={false} autoplay={true} autoplayTimeout={3}>
+            {tailorImages.map((image, index) => (
+              <View key={index} style={[styles.slide, { height: imageHeights[index] || 200 }]}>
+                <Image source={{ uri: image }} style={styles.slideImage} />
+              </View>
+            ))}
+          </Swiper>
         </View>
-        <Swiper style={styles.wrapper} showsButtons={false} autoplay={true} autoplayTimeout={3}>
-          {tailorImages.map((image, index) => (
-            <View key={index} style={[styles.slide, { height: imageHeights[index] || 0 }]}>
-              <Image source={{ uri: image }} style={styles.slideImage} />
-            </View>
-          ))}
-        </Swiper>
         <ScrollView style={styles.scrollView}>
           <View style={styles.popularItems}>
             {blogs.map((blog, index) => (
-              <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
+                <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
+                
                 <Image source={{ uri: blog.photoPath }} style={styles.itemImage} />
+                
                 <View style={styles.cardDetail}>
                   <Text style={styles.itemTitle}>{blog.title}</Text>
-                  <Text style={styles.itemPrice}>${blog.price}</Text>
+                  <Text style={styles.itemPrice}>Rs. 1500 {blog.price}</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -168,8 +161,7 @@ const CustomerHome = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    
+    backgroundColor: '#F8F9FA',
   },
   header: {
     flexDirection: 'row',
@@ -177,46 +169,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 30,
     backgroundColor: '#FF7F11',
-    height: 100,
-    margin: 0,
   },
   username: {
-    color: 'black',
+    color: '#fff',
+    fontSize: 20,
     fontWeight: 'bold',
-    margin: 6,
   },
   location: {
     fontSize: 16,
-    color: '#333',
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 6,
-  },
-  searchInput: {
-    flex: 1,
-    padding: 10,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    margin: 6,
-  },
-  searchButton: {
-    backgroundColor: '#333',
-    padding: 10,
-    borderRadius: 8,
-  },
-  searchButtonText: {
     color: '#fff',
+    marginTop: 4,
   },
-  wrapper: {
-   
+  txt:{
+    color: 'black',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  swiperContainer: {
+    marginTop:8,
+    height: 250,
+    backgroundColor: '#FF7F11',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   slide: {
     justifyContent: 'center',
@@ -225,50 +207,59 @@ const styles = StyleSheet.create({
   slideImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 10,
   },
   scrollView: {
     flex: 1,
+    backgroundColor: '#F8F9FA',
   },
   popularItems: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    padding: 6,
   },
   cardContainer: {
     width: '45%',
     marginVertical: 10,
-    backgroundColor: '#F8FAFB',
+    backgroundColor: '#fff',
     borderRadius: 10,
-    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
     padding: 10,
   },
   cardDetail: {
-    flex: 1,
+    
   },
   itemImage: {
     width: '100%',
-    height: 200,
+    height: 150,
     borderRadius: 10,
-    resizeMode: 'cover',
+    marginBottom: 10,
   },
   itemTitle: {
-    marginTop: 6,
     fontSize: 16,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#333',
+   
   },
   itemPrice: {
     marginTop: 6,
-    color: '#FF8C00',
+    color: '#FF7F11',
     fontWeight: 'bold',
+    alignItems: 'center',
   },
   fab: {
     position: 'absolute',
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FF8C00',
+    backgroundColor: '#FF7F11',
   },
 });
 
 export default CustomerHome;
+

@@ -111,24 +111,7 @@ const BottomTab = () => {
          
        }}
      />
-     <Tab.Screen
-       name="Messages"
-       component={Messages}
-       options={{
-         tabBarIcon: () => (
-           <MaterialCommunityIcons name="message-text-outline" color={"white"} size={26} />
-         ),
-         headerStyle: {
-           backgroundColor: '#FF8C00',
-           height: 80, 
-           
-         },
-         headerTintColor: '#EEF6D5',
-         headerTitleStyle: {
-           fontWeight: 'bold',
-         },
-       }}
-     />
+   
      <Tab.Screen
        name="Order"
        component={ManageOrder}
@@ -190,24 +173,7 @@ const BottomTab = () => {
                
              }}
            />
-           <Tab.Screen
-             name="Messages"
-             component={UnauthenticatedMessages}
-             options={{
-               tabBarIcon: () => (
-                 <MaterialCommunityIcons name="message-text-outline" color={"white"} size={26} />
-               ),
-               headerStyle: {
-                 backgroundColor: '#FF8C00',
-                 height: 80, 
-                 
-               },
-               headerTintColor: '#EEF6D5',
-               headerTitleStyle: {
-                 fontWeight: 'bold',
-               },
-             }}
-           />
+  
            <Tab.Screen
              name="Order"
              component={UnauthenticatedOrder}

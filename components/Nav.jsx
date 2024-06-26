@@ -15,8 +15,7 @@ import creategigs from './creategig'
 import updategig from './Updategig'
 import Gigdetail from './Gigdetail'
 
-
-import LocationSelection from './LocationSelection'
+import OrderGig from './OrderGig'; 
 
 import Home from './Home';
 
@@ -40,8 +39,7 @@ const Nav = () => {
         <Stack.Screen name='Gigdetail' component={Gigdetail}/>
         
 
-        <Stack.Screen name='LocationSelection' component={LocationSelection}/>
-        {/* <Stack.Screen name='Home' component={Home}/> */}
+        <Stack.Screen name="OrderGig" component={OrderGig} options={{ title: 'Order Gig' }} />
     
 
         
