@@ -1,13 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, TextInput, Switch } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import { getAppointment } from '../api/internal';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getAppointment, getCustomerAppointments, deleteAppointment } from '../api/internal';
+import { useNavigation } from '@react-navigation/native';
 
-const AppointmentCard = ({ appointment }) => {
-  const [isHomeDeliveryEnabled, setIsHomeDeliveryEnabled] = useState(appointment.homeDelivery || false);
+const AppointmentsScreen = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [customerAppointments, setCustomerAppointments] = useState([]);
+  const user = useSelector((state) => state.user);
+  const navigation = useNavigation();
 
-  // Formatting date and time for better readability
+  useEffect(() => {
+    fetchAppointments();
+  }, [appointments, setAppointments]);
+
+  const fetchAppointments = async () => {
+    try {
+      const [appointmentResponse, customerAppointmentResponse] = await Promise.all([
+        getAppointment(user._id),
+        getCustomerAppointments(user._id),
+      ]);
+      setAppointments(appointmentResponse.data.appointments);
+      setCustomerAppointments(customerAppointmentResponse.data.appointments);
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
+    }
+  };
+
+  const handleDelete = async (appointmentId) => {
+    try {
+      await deleteAppointment(appointmentId);
+      setAppointments(appointments.filter((appointment) => appointment._id !== appointmentId));
+      setCustomerAppointments(customerAppointments.filter((appointment) => appointment._id !== appointmentId));
+    } catch (error) {
+      console.error('Failed to delete appointment:', error);
+    }
+  };
+
+  const navigateToHomeTab = () => {
+    navigation.navigate('Home'); // Adjust this according to your navigation setup
+  };
+
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -20,50 +54,106 @@ const AppointmentCard = ({ appointment }) => {
     return `${adjustedHour}:${minute} ${ampm}`;
   };
 
+  const renderAppointment = (appointment, isCustomer) => {
+    const isHomeDeliveryEnabled = appointment.deliveryMode === 'home';
+    const profileImage = isCustomer ? appointment.tailor.profileImage : appointment.customer.profileImage;
+    const username = isCustomer ? appointment.tailor.username : appointment.customer.username;
+
+    const handleDeletePress = () => {
+      Alert.alert(
+        "Delete Appointment",
+        "Are you sure you want to delete this appointment?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Delete",
+            onPress: () => handleDelete(appointment._id),
+            style: "destructive"
+          }
+        ]
+      );
+    };
+
+    return (
+      <View key={appointment._id} style={styles.appointmentCard}>
+        <View style={styles.customerContainer}>
+          <Image
+            source={{ uri: profileImage }}
+            style={styles.customerProfilePhoto}
+          />
+          <Text style={styles.customerName}>{username}</Text>
+        </View>
+        <View style={styles.appointmentDetails}>
+          <Text style={styles.appointmentDate}>{formatDate(appointment.date)}</Text>
+          <Text style={styles.appointmentTime}>{formatTime(appointment.time)}</Text>
+          <Text style={styles.appointmentDescription}>{appointment.description}</Text>
+        </View>
+        <Text style={styles.detailLabel}>Visit Mode: {appointment.visitMode === 'home' ? 'Home' : 'Shop'}</Text>
+        <Text style={styles.detailLabel}>Delivery Mode: {appointment.deliveryMode === 'home' ? 'Home' : 'Pickup'}</Text>
+        {appointment.visitMode === 'home' && (
+          <>
+            <Text style={styles.detailLabel}>Address: {appointment.address}</Text>
+            <Text style={styles.detailLabel}>Phone Number: {appointment.phoneNumber}</Text>
+          </>
+        )}
+        {appointment.deliveryMode === 'home' && appointment.visitMode !== 'home' && (
+          <>
+            <Text style={styles.detailLabel}>Delivery Address: {appointment.address}</Text>
+            <Text style={styles.detailLabel}>Delivery Phone Number: {appointment.phoneNumber}</Text>
+          </>
+        )}
+   
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleDeletePress}>
+            <Icon name="trash" size={20} color="#FF4D4D" />
+            <Text style={styles.deleteButton}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   return (
-    <View style={styles.appointmentCard}>
-      <View style={styles.customerContainer}>
-        <Image
-          source={{ uri: appointment.customer.profileImage }}
-          style={styles.customerProfilePhoto}
-        />
-        <Text style={styles.customerName}>{appointment.customer.username}</Text>
-      </View>
-      <View style={styles.appointmentDetails}>
-        <Text style={styles.appointmentDate}>{formatDate(appointment.date)}</Text>
-        <Text style={styles.appointmentTime}>{formatTime(appointment.time)}</Text>
-        <Text style={styles.appointmentDescription}>{appointment.description}</Text>
-      </View>
-      <View style={styles.locationContainer}>
-        <Icon name="map-marker" size={20} color="#FF7F11" />
-        <TextInput
-          style={styles.locationInput}
-          placeholder="Enter location"
-          value={appointment.location}
-          editable={false}
-        />
-      </View>
-      <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Home Delivery:</Text>
-        <Switch
-          value={isHomeDeliveryEnabled}
-          onValueChange={(value) => setIsHomeDeliveryEnabled(value)}
-          disabled
-          thumbColor={isHomeDeliveryEnabled ? '#FF8C00' : '#f4f3f4'}
-          trackColor={{ false: '#767577', true: '#FF8C00' }}
-        />
-      </View>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Icon name="trash" size={20} color="#FF4D4D" />
-          <Text style={styles.deleteButton}>Delete</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.scrview}>
+      <ScrollView style={styles.container}>
+        {appointments.length > 0 && <Text style={styles.sectionHeader}>Appointments with You</Text>}
+        {appointments.map((appointment) => renderAppointment(appointment, false))}
+        {customerAppointments.length > 0 && <Text style={styles.sectionHeader}>Appointments You Booked</Text>}
+        {customerAppointments.map((appointment) => renderAppointment(appointment, true))}
+        {appointments.length === 0 && customerAppointments.length === 0 && (
+          <View style={styles.containernoapp}>
+            <Image style={styles.backImg} source={require("../assets/tailorlogo.png")} />
+            <Text style={styles.ttext}>No Appointment</Text>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+
+  container: {
+    flex: 1,
+    paddingLeft: 20,
+    paddingRight: 20,
+    backgroundColor: 'white',
+  },
+  scrview: {
+    flex: 1,
+    backgroundColor: 'white',
+    margin: 0,
+    padding: 0,
+  },
+  sectionHeader: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'grey',
+    marginVertical: 10,
+  },
   appointmentCard: {
     padding: 20,
     marginBottom: 15,
@@ -110,22 +200,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     color: '#777',
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  locationInput: {
-    flex: 1,
-    height: 40,
-    color: 'black',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginLeft: 10,
-    backgroundColor: '#f8f8f8',
+  detailLabel: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 5,
   },
   switchContainer: {
     flexDirection: 'row',
@@ -153,41 +231,53 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 5,
   },
-});
-
-const AppointmentsScreen = () => {
-  const [appointments, setAppointments] = useState([]);
-  const user = useSelector((state) => state.user);
-
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
-
-  const fetchAppointments = async () => {
-    try {
-      const response = await getAppointment(user._id);
-      setAppointments(response.data.appointments);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return (
-    <View style={screenStyles.container}>
-      <FlatList
-        data={appointments}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => <AppointmentCard appointment={item} />}
-      />
-    </View>
-  );
-};
-
-const screenStyles = StyleSheet.create({
-  container: {
+  containernoapp: {
+ 
     flex: 1,
-    padding: 20,
-    backgroundColor: '#E8EAF6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 300,
+  },
+  backImg: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+  },
+  ttext: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  ptext: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  profileLink: {
+    fontSize: 18,
+    color: '#FF8C00',
+    textAlign: 'center',
+  },
+  backImg: {
+    width: 150,
+    height: 150,
+  },
+  ttext: {
+    color: '#FF8C00',
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  ptext: {
+    color: 'black',
+    marginTop: 5,
+  },
+  profileLink: {
+    marginTop: 15,
+    color: '#FF8C00',
+    fontWeight: 'bold',
+    textDecorationLine: 'underline',
   },
 });
 

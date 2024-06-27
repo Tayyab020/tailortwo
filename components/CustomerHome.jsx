@@ -141,7 +141,7 @@ const CustomerHome = () => {
                 
                 <View style={styles.cardDetail}>
                   <Text style={styles.itemTitle}>{blog.title}</Text>
-                  <Text style={styles.itemPrice}>Rs. 1500 {blog.price}</Text>
+                  <Text style={styles.itemPrice}>Rs. {blog.price}</Text>
                 </View>
               </TouchableOpacity>
             ))}

@@ -132,10 +132,7 @@ const Profile = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollableContent}>
         <View style={styles.section}>
-          <TouchableOpacity style={styles.optionButton}>
-            <Icon name="circle" size={20} color="#333" style={styles.optionIcon} />
-            <Text style={styles.optionText}>Set Availability</Text>
-          </TouchableOpacity>
+
           <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
             <Icon name="sign-out" size={20} color="#333" style={styles.optionIcon} />
             <Text style={styles.optionText}>Logout</Text>

@@ -17,6 +17,10 @@ import Gigdetail from './Gigdetail'
 
 import OrderGig from './OrderGig'; 
 
+
+import UserDetailsScreen from './UserDetailsScreen';
+
+
 import Home from './Home';
 
 const Stack = createNativeStackNavigator();
@@ -40,8 +44,9 @@ const Nav = () => {
         
 
         <Stack.Screen name="OrderGig" component={OrderGig} options={{ title: 'Order Gig' }} />
-    
 
+
+        <Stack.Screen name="UserDetails" component={UserDetailsScreen} />
         
         <Stack.Screen name="BottomTab" component={BottomTab}  options={{ headerShown: false }} />
         

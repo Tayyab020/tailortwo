@@ -64,6 +64,9 @@ router.delete('/blog/:id', auth, blogController.delete);
 router.post('/appointments', auth, appointmentController.create);
 // router.get('/appointments/all', auth, appointmentController.getAll);
 router.get('/appointment/:tailorId', auth, appointmentController.getAll);
+router.get('/customer-appointments/:customerId', auth, appointmentController.getCustomerAppointments);
+
+router.delete('/appointments/:id', auth, appointmentController.delete);
 
 
 // router.post('/appointment', appointmentController.create);

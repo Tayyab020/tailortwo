@@ -113,7 +113,7 @@ const BottomTab = () => {
      />
    
      <Tab.Screen
-       name="Order"
+       name="Appointments"
        component={ManageOrder}
        options={{
          tabBarIcon: () => (
@@ -124,7 +124,7 @@ const BottomTab = () => {
            height: 80, 
            
          },
-         headerTintColor: '#EEF6D5',
+         headerTintColor: 'white',
          headerTitleStyle: {
            fontWeight: 'bold',
          },
@@ -175,7 +175,7 @@ const BottomTab = () => {
            />
   
            <Tab.Screen
-             name="Order"
+             name="Appointment"
              component={UnauthenticatedOrder}
              options={{
                tabBarIcon: () => (
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     elevation: 0, // Set elevation to 0 to remove shadow on Android
   },
   tabIcon:{
-    color:"#EEF6D5",
+    color:"white",
   }
 });
 

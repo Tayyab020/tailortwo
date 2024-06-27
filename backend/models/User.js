@@ -8,7 +8,10 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   profileImage: { type: String },
   isTailor: { type: Boolean },
-  location: { type: String } // Initially null, can be updated later
+  address: { type: String },
+  phoneNumber: { type: String },
+  availabilityTimeFrom: { type: String },
+  availabilityTimeTo: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema, 'users');

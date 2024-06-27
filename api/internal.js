@@ -157,6 +157,35 @@ export const getAppointment = async (tailorId) => {
   }
 };
 
+export const getCustomerAppointments = async (customerId) => {
+  try {
+    const response = await api.get(`/customer-appointments/${customerId}`);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const deleteAppointment = async (id) => {
+  try {
+    const response = await api.delete(`/appointments/${id}`);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+export const updateUserDetails = async (userId, data) => {
+  try {
+    const response = await api.put(`/users/${userId}`, data);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
+
 export const getAllChats = async () => {
   return await api.get('/chats');
 };

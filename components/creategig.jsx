@@ -62,14 +62,14 @@ const CreateBlog = () => {
           onChangeText={text => setTitle(text)}
           placeholderTextColor="#666"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Price"
-          value={price}
-          onChangeText={text => setPrice(text)}
-          placeholderTextColor="#666"
-          keyboardType="numeric"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Price"
+            value={price}
+            onChangeText={text => setPrice(text)}
+            placeholderTextColor="#666"
+            keyboardType="numeric"
+          />
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="Content"
