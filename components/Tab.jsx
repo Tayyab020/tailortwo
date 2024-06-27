@@ -29,7 +29,7 @@ const BottomTab = () => {
       try {
         const userToken = await AsyncStorage.getItem('userToken');
         const userT = await AsyncStorage.getItem('user')
-        console.log(userT)
+    
         
         if (userToken) {
           // Check if token is expired

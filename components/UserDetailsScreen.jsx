@@ -1,28 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TextInput, Button, ToastAndroid } from 'react-native';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
-import { updateUserDetails } from '../api/internal';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ToastAndroid, Platform } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { getUserDetails, updateUserDetails } from '../api/internal';
 import { setUser } from '../store/userSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const UserDetailsScreen = () => {
-  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const route = useRoute();
+  const { userId } = route.params;
 
-  const [address, setAddress] = useState(user.address || '');
-  const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
-  const [availabilityTimeFrom, setAvailabilityTimeFrom] = useState(user.availabilityTimeFrom || '');
-  const [availabilityTimeTo, setAvailabilityTimeTo] = useState(user.availabilityTimeTo || '');
+  const [user, setUserState] = useState({});
+  const [address, setAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [availabilityTimeFrom, setAvailabilityTimeFrom] = useState('');
+  const [availabilityTimeTo, setAvailabilityTimeTo] = useState('');
   const [editing, setEditing] = useState(false);
+  const [showFromTimePicker, setShowFromTimePicker] = useState(false);
+  const [showToTimePicker, setShowToTimePicker] = useState(false);
 
   useEffect(() => {
-    if (!user.address || !user.phoneNumber || !user.availabilityTimeFrom || !user.availabilityTimeTo) {
-      setEditing(true);
-    }
-  }, [user]);
+    const fetchUserDetails = async () => {
+      try {
+        const response = await getUserDetails(userId);
+        if (response.status === 200) {
+          const userData = response.data;
+          setUserState(userData);
+          setAddress(userData.address || '');
+          setPhoneNumber(userData.phoneNumber || '');
+          setAvailabilityTimeFrom(userData.availabilityTimeFrom || '');
+          setAvailabilityTimeTo(userData.availabilityTimeTo || '');
+          setEditing(false);
+        } else {
+          ToastAndroid.show('Failed to fetch user details', ToastAndroid.SHORT);
+        }
+      } catch (error) {
+        ToastAndroid.show(`Error: ${error.response?.data?.message || error.message}`, ToastAndroid.SHORT);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userId]);
 
   const handleSave = async () => {
+    if (!address || !phoneNumber || !availabilityTimeFrom || !availabilityTimeTo) {
+      ToastAndroid.show('All fields are required', ToastAndroid.SHORT);
+      return;
+    }
+
     try {
       const updatedUser = {
         ...user,
@@ -35,35 +63,54 @@ const UserDetailsScreen = () => {
       const response = await updateUserDetails(user._id, updatedUser);
       if (response.status === 200) {
         dispatch(setUser(updatedUser));
+        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+        const jsonValue = await AsyncStorage.getItem('user');
+        const storedUserData = JSON.parse(jsonValue);
+        console.log("Async stored Successfully on Tab", storedUserData);
         ToastAndroid.show('Details updated successfully', ToastAndroid.SHORT);
-        navigation.navigate('Profile');
+        setEditing(false);
+        navigation.navigate('Profile'); // Navigate to Profile screen
       } else {
         ToastAndroid.show('Failed to update details', ToastAndroid.SHORT);
       }
     } catch (error) {
-      ToastAndroid.show(`Error: ${error.message}`, ToastAndroid.SHORT);
+      ToastAndroid.show(`Error: ${error.response?.data?.message || error.message}`, ToastAndroid.SHORT);
     }
+  };
+
+  const onFromTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || availabilityTimeFrom;
+    setShowFromTimePicker(Platform.OS === 'ios');
+    setAvailabilityTimeFrom(currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+  };
+
+  const onToTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || availabilityTimeTo;
+    setShowToTimePicker(Platform.OS === 'ios');
+    setAvailabilityTimeTo(currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.absolute} />
       <View style={styles.content}>
-        <Image source={{ uri: user.profileImage }} style={styles.profileImage} />
+        <Image source={user.profileImage ? { uri: user.profileImage } : require('../assets/user.png')} style={styles.profileImage} />
         <Text style={styles.username}>{user.username}</Text>
         <Text style={styles.email}>{user.email}</Text>
-        
+
         {editing ? (
           <>
             <TextInput
               style={styles.input}
               placeholder="Enter Address"
+              placeholderTextColor="#aaa"
               value={address}
               onChangeText={setAddress}
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Phone Number"
+              placeholderTextColor="#aaa"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
@@ -71,26 +118,57 @@ const UserDetailsScreen = () => {
             <TextInput
               style={styles.input}
               placeholder="Availability Time From"
+              placeholderTextColor="#aaa"
               value={availabilityTimeFrom}
-              onChangeText={setAvailabilityTimeFrom}
+              onFocus={() => setShowFromTimePicker(true)}
             />
             <TextInput
               style={styles.input}
               placeholder="Availability Time To"
+              placeholderTextColor="#aaa"
               value={availabilityTimeTo}
-              onChangeText={setAvailabilityTimeTo}
+              onFocus={() => setShowToTimePicker(true)}
             />
-            <Button title="Save" onPress={handleSave} />
+            <TouchableOpacity style={styles.button} onPress={handleSave}>
+              <Text style={styles.buttonText}>Save</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <>
-            <Text style={styles.detail}>Address: {address}</Text>
-            <Text style={styles.detail}>Phone Number: {phoneNumber}</Text>
-            <Text style={styles.detail}>Availability: {availabilityTimeFrom} - {availabilityTimeTo}</Text>
-            <Button title="Edit" onPress={() => setEditing(true)} />
+            <Text style={styles.detail}>Address: {user.address}</Text>
+            <Text style={styles.detail}>Phone Number: {user.phoneNumber}</Text>
+            <Text style={styles.detail}>Availability: {user.availabilityTimeFrom} - {user.availabilityTimeTo}</Text>
+            {user._id === userId && (
+              <TouchableOpacity style={styles.button} onPress={() => setEditing(true)}>
+                <Text style={styles.buttonText}>Edit</Text>
+              </TouchableOpacity>
+            )}
+            {user._id !== userId && (
+              <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            )}
           </>
         )}
       </View>
+      {showFromTimePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onFromTimeChange}
+        />
+      )}
+      {showToTimePicker && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={onToTimeChange}
+        />
+      )}
     </View>
   );
 };
@@ -117,6 +195,7 @@ const styles = StyleSheet.create({
     width: '90%',
     padding: 20,
     borderRadius: 10,
+    elevation: 5,
   },
   profileImage: {
     width: 100,
@@ -149,6 +228,21 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#f8f8f8',
     color: 'black',
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#FF7F11',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '100%',
+  },
+  buttonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

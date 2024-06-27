@@ -10,13 +10,13 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Profile = () => {
   const user = useSelector((state) => state.user);
+  const userId=user._id
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sellerMode, setSellerMode] = useState(user.isTailor);
-  const [notifications, setNotifications] = useState(2);
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -101,6 +101,10 @@ const Profile = () => {
     await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const navigateToUserDetails = () => {
+    navigation.navigate('UserDetails', { userId })
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -116,8 +120,10 @@ const Profile = () => {
             )}
           </TouchableOpacity>
           <View style={styles.headerInfo}>
-            <Text style={styles.username}>{user.username}</Text>
-            <Text style={styles.email}>{user.email}</Text>
+            <TouchableOpacity onPress={navigateToUserDetails}>
+              <Text style={styles.username}>{user.username}</Text>
+              <Text style={styles.email}>{user.email}</Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.sellerModeContainer}>
@@ -132,7 +138,6 @@ const Profile = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollableContent}>
         <View style={styles.section}>
-
           <TouchableOpacity style={styles.optionButton} onPress={handleLogout}>
             <Icon name="sign-out" size={20} color="#333" style={styles.optionIcon} />
             <Text style={styles.optionText}>Logout</Text>

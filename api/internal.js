@@ -1,7 +1,7 @@
  import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.200.160:3000",
+  baseURL: "http://10.20.7.42:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -184,7 +184,14 @@ export const updateUserDetails = async (userId, data) => {
   }
 };
 
-
+export const getUserDetails = async () => {
+  try {
+    const response = await api.get(`/users/details`);
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
 
 export const getAllChats = async () => {
   return await api.get('/chats');

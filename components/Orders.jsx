@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, Switch, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getAppointment, getCustomerAppointments, deleteAppointment } from '../api/internal';
@@ -13,7 +13,7 @@ const AppointmentsScreen = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [appointments, setAppointments]);
+  }, []);
 
   const fetchAppointments = async () => {
     try {
@@ -38,10 +38,6 @@ const AppointmentsScreen = () => {
     }
   };
 
-  const navigateToHomeTab = () => {
-    navigation.navigate('Home'); // Adjust this according to your navigation setup
-  };
-
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -55,9 +51,9 @@ const AppointmentsScreen = () => {
   };
 
   const renderAppointment = (appointment, isCustomer) => {
-    const isHomeDeliveryEnabled = appointment.deliveryMode === 'home';
     const profileImage = isCustomer ? appointment.tailor.profileImage : appointment.customer.profileImage;
     const username = isCustomer ? appointment.tailor.username : appointment.customer.username;
+    const userId = isCustomer ? appointment.tailor._id : appointment.customer._id;
 
     const handleDeletePress = () => {
       Alert.alert(
@@ -79,13 +75,16 @@ const AppointmentsScreen = () => {
 
     return (
       <View key={appointment._id} style={styles.appointmentCard}>
-        <View style={styles.customerContainer}>
+        <TouchableOpacity
+          style={styles.customerContainer}
+          onPress={() => navigation.navigate('UserDetails', { userId })}
+        >
           <Image
             source={{ uri: profileImage }}
             style={styles.customerProfilePhoto}
           />
           <Text style={styles.customerName}>{username}</Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.appointmentDetails}>
           <Text style={styles.appointmentDate}>{formatDate(appointment.date)}</Text>
           <Text style={styles.appointmentTime}>{formatTime(appointment.time)}</Text>
@@ -105,7 +104,6 @@ const AppointmentsScreen = () => {
             <Text style={styles.detailLabel}>Delivery Phone Number: {appointment.phoneNumber}</Text>
           </>
         )}
-   
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton} onPress={handleDeletePress}>
             <Icon name="trash" size={20} color="#FF4D4D" />
@@ -135,7 +133,6 @@ const AppointmentsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     paddingLeft: 20,
@@ -205,17 +202,6 @@ const styles = StyleSheet.create({
     color: '#555',
     marginTop: 5,
   },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  switchLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -232,7 +218,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   containernoapp: {
- 
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
