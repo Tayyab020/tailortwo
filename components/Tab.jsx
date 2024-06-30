@@ -97,7 +97,7 @@ const BottomTab = () => {
          tabBarIcon: () => (
            <MaterialCommunityIcons name="home" style={styles.tabIcon} size={26} />
          ),
-         headerShown: false,
+        //  headerShown: false,
          headerStyle: {
            backgroundColor: '#FF8C00',
            height: 80, 
@@ -159,7 +159,7 @@ const BottomTab = () => {
                tabBarIcon: () => (
                  <MaterialCommunityIcons name="home" style={styles.tabIcon} size={26} />
                ),
-               headerShown: false,
+              //  headerShown: false,
                headerStyle: {
                  backgroundColor: '#FF8C00',
                  height: 80, 

@@ -1,40 +1,42 @@
-import React, {useState, useEffect} from 'react';
-import {ActivityIndicator, View, StyleSheet, Image, Text,StatusBar} from 'react-native';
-import axios from 'axios';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../store/userSlice';
-import { useSelector } from 'react-redux';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Image, Text, StatusBar, Animated } from 'react-native';
 
-const SplashScreen = props => {
-  // const [isAuthenticated,setisAuthenticated]=useState(false)
-  //  const getData=async()=>{
-  //   const jsonValue = await AsyncStorage.getItem('user');
-  //     const storedonStorage=JSON.parse(jsonValue) 
-  //     console.log("Async stored Sucessfully on splash",storedonStorage)
+const SplashScreen = (props) => {
+  const fadeAnim = new Animated.Value(0);
+  const scaleAnim = new Animated.Value(0.8);
 
-  //     dispatch(setUser(jsonValue));
-  // }
-  // getData()
-  // const dispatch = useDispatch();
-  // const isAuthenticated=useSelector((state)=>state.user.auth)
   useEffect(() => {
-    setTimeout(async () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setTimeout(() => {
       props.navigation.navigate('BottomTab');
-     
-    }, 2000);
+    }, 3000);
   }, []);
 
   return (
     <View style={styles.container}>
-      <StatusBar translucent backgroundColor="transparent"  />
-      <Image
+      <StatusBar translucent backgroundColor="transparent" />
+      <Animated.Image
         source={require('../assets/tailorlogo.png')}
-        style={{width: '80%', resizeMode:'contain', margin: 0}}
+        style={[
+          styles.logo,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
       />
-      <Text style={styles.title}>
+      <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>
         Tailor Hub
-      </Text>
+      </Animated.Text>
     </View>
   );
 };
@@ -46,21 +48,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'orange',
-   
+    backgroundColor: 'white',
   },
-  title:{
-    color:"orange",
-    backgroundColor: "white",
-    borderRadius:10,
-    padding:5,
-    paddingBottom:0,
-    paddingTop:0,
-    fontWeight:"bold", 
-    fontSize:40,
-    margin:0,
+  logo: {
+    width: '80%',
+    resizeMode: 'contain',
+    margin: 0,
+  },
+  title: {
+    color: '#FF8C00',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 5,
+    fontWeight: 'bold',
+    fontSize: 40,
     position: 'absolute',
-    top:"67%",
-    
-  }
+    top: '67%',
+  },
 });

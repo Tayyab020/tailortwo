@@ -1,9 +1,7 @@
 const express = require('express');
 const authController = require('../controller/authController');
 const blogController = require('../controller/blogController');
-const commentController = require('../controller/commentController');
 const appointmentController = require('../controller/appointmentController');
-const locationController = require('../controller/locationController');
 const auth = require('../middlewares/auth');
 
 const router = express.Router();
@@ -25,6 +23,10 @@ router.post('/login', authController.login);
 // logout
 router.post('/logout', auth, authController.logout);
 
+// reset password
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+
 // refresh
 router.get('/refresh', authController.refresh);
 
@@ -36,29 +38,21 @@ router.get('/users/:userId/profile-image', auth, authController.getProfileImage)
 
 
 router.put('/users/:id', auth, authController.updateUserDetails);
-router.get('/users/details', auth, authController.getUserDetails);
+router.get('/users/:id', auth, authController.getUserDetails);
 
 
-//location
-router.post('/save-location', auth, locationController.saveLocation); // Add this line
+
 
 // blog
-
 // create
 router.post('/blog', auth, blogController.create);
-// router.post('/blog', blogController.create);
-
 // get all
 // router.get('/blog/all', auth, blogController.getAll);
 router.get('/blog/all', blogController.getAll);
-
 // get blog by id
 router.get('/blog/:id', auth, blogController.getById);
-// router.get('/blog/:id', blogController.getById);
-
 // update
 router.put('/blog', auth, blogController.update);
-
 // delete
 router.delete('/blog/:id', auth, blogController.delete);
 
@@ -66,25 +60,9 @@ router.delete('/blog/:id', auth, blogController.delete);
 
 // appointments
 router.post('/appointments', auth, appointmentController.create);
-// router.get('/appointments/all', auth, appointmentController.getAll);
 router.get('/appointment/:tailorId', auth, appointmentController.getAll);
 router.get('/customer-appointments/:customerId', auth, appointmentController.getCustomerAppointments);
-
 router.delete('/appointments/:id', auth, appointmentController.delete);
-
-
-// router.post('/appointment', appointmentController.create);
-// router.get('/appointments', appointmentController.getAll);
-// router.get('/appointment/:id', appointmentController.getById);
-// router.put('/appointment', appointmentController.update);
-// router.delete('/appointment/:id', appointmentController.delete);
-
-// comment
-// create 
-router.post('/comment', auth, commentController.create);
-
-// get 
-router.get('/comment/:id', auth, commentController.getById);
 
 
 

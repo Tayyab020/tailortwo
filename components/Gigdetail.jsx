@@ -1,13 +1,22 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux'; // Import useSelector to access the user state
+import { useSelector } from 'react-redux';
 
 const GigDetail = ({ route }) => {
   const { blog } = route.params;
   const navigation = useNavigation();
+  const currentUserId = useSelector((state) => state.user._id);
 
-  const currentUserId = useSelector((state) => state.user._id); // Get the current user's ID
+  const fadeAnim = new Animated.Value(0);
+
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   const handleOrderPress = () => {
     navigation.navigate('OrderGig', { blog });
@@ -15,14 +24,14 @@ const GigDetail = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
+      <Animated.View style={[styles.imageContainer, { opacity: fadeAnim }]}>
         <Image 
           source={{ uri: blog.photoPath }} 
           style={styles.image} 
-          resizeMode="cover"
+          resizeMode="contain"  // Changed to 'contain' for full image display
         />
-      </View>
-      <View style={styles.contentContainer}>
+      </Animated.View>
+      <Animated.View style={[styles.contentContainer, { opacity: fadeAnim }]}>
         <View style={styles.profileContainer}>
           <Image 
             source={{ uri: blog.authorPhotoPath }} 
@@ -37,7 +46,7 @@ const GigDetail = ({ route }) => {
             <Text style={styles.orderButtonText}>Order this Gig</Text>
           </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -46,13 +55,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    padding: 0,
     backgroundColor: '#F7F7F7',
   },
   imageContainer: {
     width: '100%',
-    height: 200,
-    marginBottom: 10,
+    height: 300,
   },
   image: {
     width: '100%',
@@ -71,6 +78,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
+    marginTop: -10,
   },
   profileContainer: {
     flexDirection: 'row',
@@ -106,6 +114,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     marginBottom: 20,
+    elevation: 3,
   },
   orderButtonText: {
     color: 'white',

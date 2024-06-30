@@ -1,5 +1,5 @@
+// models/User.js
 const mongoose = require('mongoose');
-
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
@@ -12,6 +12,8 @@ const userSchema = new Schema({
   phoneNumber: { type: String },
   availabilityTimeFrom: { type: String },
   availabilityTimeTo: { type: String },
+  resetToken: { type: String },
+  tokenExpiration: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema, 'users');

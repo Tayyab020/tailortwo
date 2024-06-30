@@ -38,6 +38,10 @@ const AppointmentsScreen = () => {
     }
   };
 
+  const handleNamePress = (userId) => {
+    navigation.navigate('UserDetails', { userId });
+  };
+
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -77,7 +81,7 @@ const AppointmentsScreen = () => {
       <View key={appointment._id} style={styles.appointmentCard}>
         <TouchableOpacity
           style={styles.customerContainer}
-          onPress={() => navigation.navigate('UserDetails', { userId })}
+          onPress={() => handleNamePress(userId)}
         >
           <Image
             source={{ uri: profileImage }}
@@ -231,27 +235,7 @@ const styles = StyleSheet.create({
   ttext: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  ptext: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  profileLink: {
-    fontSize: 18,
     color: '#FF8C00',
-    textAlign: 'center',
-  },
-  backImg: {
-    width: 150,
-    height: 150,
-  },
-  ttext: {
-    color: '#FF8C00',
-    fontWeight: 'bold',
     marginTop: 10,
   },
   ptext: {

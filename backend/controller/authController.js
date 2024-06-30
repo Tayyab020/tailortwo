@@ -5,7 +5,8 @@ const UserDTO = require("../dto/user");
 const JWTService = require("../services/JWTService");
 const RefreshToken = require("../models/token");
 const cloudinary = require('cloudinary').v2;
-
+const { sendResetEmail } = require('../utils/email');
+const crypto = require('crypto');
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
@@ -217,6 +218,63 @@ const authController = {
     // 2. response
     res.status(200).json({ user: null, auth: false });
   },
+  async forgotPassword(req, res, next) {
+    const { email } = req.body;
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const code = crypto.randomBytes(3).toString('hex').toUpperCase();
+      user.resetToken = code;
+      user.tokenExpiration = Date.now() + 3600000; // 1 hour
+      await user.save();
+    
+      await sendResetEmail(user.email, code);
+
+      res.json({ message: 'Verification code sent to your email' });
+    } catch (error) {
+      next(error);
+    }
+  },
+  async resetPassword(req, res, next) {
+    const { email, code, password } = req.body;
+    try {
+      const user = await User.findOne({
+        email,
+        resetToken: code,
+        tokenExpiration: { $gt: Date.now() },
+      });
+
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+      }
+
+      user.password = await bcrypt.hash(password, 10);
+      user.resetToken = undefined;
+      user.tokenExpiration = undefined;
+      await user.save();
+
+      res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  },
+  async renderResetPage (req, res) {
+    res.send(`
+      <html>
+        <body>
+          <h1>Reset Password</h1>
+          <form action="/reset-password/${req.params.token}" method="POST">
+            <input type="password" name="password" placeholder="New Password" required />
+            <button type="submit">Reset Password</button>
+          </form>
+        </body>
+      </html>
+    `);
+  },
   async refresh(req, res, next) {
     // 1. get refreshToken from cookies
     // 2. verify refreshToken
@@ -354,8 +412,8 @@ const authController = {
   },
   async getUserDetails(req, res, next) {
     try {
-      const userId = req.user._id; // Assumes the user ID is available in the request object (set by authentication middleware)
-      const user = await User.findById(userId);
+      const {id} = req.params; // Assumes the user ID is available in the request object (set by authentication middleware)
+      const user = await User.findById(id);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }

@@ -3,28 +3,16 @@ import * as React from 'react';
 import {
   View,
   Text,
-  ImageBackground,
   StyleSheet,
   TouchableOpacity,
   TextInput,
   Image,
-  ScrollView,
   KeyboardAvoidingView,
   ToastAndroid
 } from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {loginUser, googleAuth, facebookAuth} from '../utils/api';
-
-import BottomTab from"./Tab"
-
-import axios from "axios";
-import { useNavigation } from '@react-navigation/native'; 
 import {login} from"../api/internal"
 import { setUser } from '../store/userSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -36,10 +24,6 @@ function Login(props) {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [passwordVisible, setPasswordVisible] = React.useState(false);
-
-
-    
-
   
 const LoginSchema = Yup.object().shape({
   username: Yup.string()
@@ -60,47 +44,6 @@ const LoginSchema = Yup.object().shape({
     setPasswordVisible(!passwordVisible);
   };
   const dispatch = useDispatch();
-  const handleSignIn=async()=>{
-  
-    const userData = {
-      username: email,
-      password:password
-    };
-    console.log(userData)
-    try{
-      const response=await login(userData)
-      console.log("login ho gya",response)
-      if (response.status === 200) {
-        
-        // 1. setUser
-        const user = {
-            _id: response.data.user._id,
-            email: response.data.user.email,
-            username: response.data.user.username,
-            auth: response.data.auth,
-          };
-    
-          dispatch(setUser(user));
-          
-        // console.log(`setUser success`,user)
-        // 2. redirect -> homepage
-        props.navigation.navigate('BottomTab');
-        ToastAndroid.show('login success', ToastAndroid.SHORT);
-      
-      } else if (response.code === "ERR_BAD_REQUEST") {
-        // display error message
-        setError(response.response.data.message);
-      }
-    }
-     catch (error) {
-      console.log("login failed ",error.message)
-      ToastAndroid.show(error.message, ToastAndroid.SHORT);
-    }
-    // finally{
-    //   setLoading(false)
-    // }
-  }
-
 
   return (
     <KeyboardAvoidingView style={{flex: 1,alignItems: 'center'}}>
@@ -118,12 +61,8 @@ const LoginSchema = Yup.object().shape({
           validationSchema={LoginSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              const response=await login(values)
-              // const response = await axios.post("http://192.168.32.160:3000/login", values);
-             
-
-        
-              if (response.status === 200) {
+              const response=await login(values)     
+            if (response.status === 200) {
                 console.log("Login Sucessfully", response.data);
                 const user = {
                   _id: response.data.user._id,
@@ -197,6 +136,11 @@ const LoginSchema = Yup.object().shape({
                   <Icon name={passwordVisible ? 'eye-slash' : 'eye'} size={20} color="#888" />
                 </TouchableOpacity>
               </View>
+              <View style={styles.forgotPassword}>
+              <TouchableOpacity onPress={() => props.navigation.navigate('ForgotPassword')}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                </TouchableOpacity>
+              </View>
               {errors.password && <Text style={{ color: 'red' }}>{errors.password}</Text>}
               <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>LOGIN</Text>
@@ -211,33 +155,6 @@ const LoginSchema = Yup.object().shape({
             <Text style={[styles.signUpText, styles.loginLink]}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-
-        {/* <View style={styles.orContainer}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>Or Sign In With</Text>
-          <View style={styles.line} />
-        </View>
-
-        <View style={styles.socialContainer}>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={handleGoogleAuth}>
-            <Image
-              source={require('../assets/google.png')}
-              style={styles.socialButtonIcon}
-            />
-            <Text style={styles.socialButtonText}>Google</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.socialButton}
-            onPress={handleFacebookAuth}>
-            <Image
-              source={require('../assets/facebook.png')}
-              style={styles.socialButtonIcon}
-            />
-            <Text style={styles.socialButtonText}>Facebook</Text>
-          </TouchableOpacity>
-        </View> */}
       </View>
     </KeyboardAvoidingView>
   );
@@ -306,6 +223,15 @@ const styles = StyleSheet.create({
     top: '50%',
     transform: [{translateY: -10}],
   },
+  forgotPassword:{
+    flex: 1,
+    alignItems: 'flex-end', 
+    marginBottom: 10,
+  },
+  forgotPasswordText:{
+    color: 'white',
+    fontSize: 14,
+  },
   button: {
     backgroundColor: '#FF8C00',
     borderRadius: 8,
@@ -317,7 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-
   signUpTextContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -331,41 +256,5 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 27,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'white',
-  },
-  orText: {
-    color: 'white',
-    marginHorizontal: 10,
-  },
-  socialContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  socialButton: {
-    flexDirection: 'row', // Adjusted to align icon and text horizontally
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '48%', // Adjust as needed
-  },
-  socialButtonIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'black', // Change text color to white
-  },
+ 
 });

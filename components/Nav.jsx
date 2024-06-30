@@ -22,6 +22,8 @@ import UserDetailsScreen from './UserDetailsScreen';
 
 
 import Home from './Home';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 
 const Stack = createNativeStackNavigator();
 const Nav = () => {
@@ -48,6 +50,10 @@ const Nav = () => {
 
         <Stack.Screen name="UserDetails" component={UserDetailsScreen} />
         
+        <Stack.Screen name='ForgotPassword' component={ForgotPassword}/>
+        <Stack.Screen name='ResetPassword' component={ResetPassword}/>
+        
+
         <Stack.Screen name="BottomTab" component={BottomTab}  options={{ headerShown: false }} />
         
       </Stack.Navigator>

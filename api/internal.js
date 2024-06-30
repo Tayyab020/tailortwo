@@ -1,7 +1,7 @@
  import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.20.7.42:3000",
+  baseURL: "http://192.168.195.160:3000",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -43,6 +43,24 @@ export const signout = async () => {
     handleError(error);
   }
 };
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post("/forgot-password", { email });
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+export const resetPassword = async (email, code, password) => {
+  try {
+    const response = await api.post('/reset-password', { email, code, password });
+    return response;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+
 
 export const getAllBlogs = async () => {
   try {
@@ -65,26 +83,6 @@ export const submitBlog = async (data) => {
 export const getBlogById = async (id) => {
   try {
     const response = await api.get(`/blog/${id}`);
-    return response;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const getCommentsById = async (id) => {
-  try {
-    const response = await api.get(`/comment/${id}`, {
-      validateStatus: false,
-    });
-    return response;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const postComment = async (data) => {
-  try {
-    const response = await api.post("/comment", data);
     return response;
   } catch (error) {
     handleError(error);
@@ -127,15 +125,6 @@ export const getProfileImage = async (userId) => {
   } catch (error) {
     handleError(error);
     return { status: error.response?.status || 500, data: { profileImage: null } };
-  }
-};
-
-export const saveLocation = async (userId, location) => {
-  try {
-    const response = await api.post('/save-location', { userId, location });
-    return response;
-  } catch (error) {
-    handleError(error);
   }
 };
 
@@ -184,29 +173,9 @@ export const updateUserDetails = async (userId, data) => {
   }
 };
 
-export const getUserDetails = async () => {
+export const getUserDetails = async (userId) => {
   try {
-    const response = await api.get(`/users/details`);
-    return response;
-  } catch (error) {
-    handleError(error);
-  }
-};
-
-export const getAllChats = async () => {
-  return await api.get('/chats');
-};
-
-export const getChatById = async (chatId) => {
-  return await api.get(`/chats/${chatId}`);
-};
-
-export const sendMessage = async (chatId, message) => {
-  return await api.post(`/chats/${chatId}/messages`, { message });
-};
-export const getChats = async () => {
-  try {
-    const response = await api.get("/chats");
+    const response = await api.get(`/users/${userId}`);
     return response;
   } catch (error) {
     handleError(error);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ScrollView, View, Text, StyleSheet, TouchableOpacity, Image, TextInput,
-  KeyboardAvoidingView, Platform, ToastAndroid, Dimensions
+  KeyboardAvoidingView, Platform, ToastAndroid, Dimensions, Animated
 } from 'react-native';
 import { FAB, Provider } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +19,7 @@ const CustomerHome = () => {
   const [visibleMenus, setVisibleMenus] = useState({});
   const [profileImage, setProfileImage] = useState(user.profileImage);
   const [imageHeights, setImageHeights] = useState({});
+  const fadeAnim = new Animated.Value(0);
 
   useEffect(() => {
     const fetchProfileImage = async () => {
@@ -71,6 +72,14 @@ const CustomerHome = () => {
     getImageHeights();
   }, []);
 
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   const navigation = useNavigation();
 
   const navigateToDetail = (blog) => {
@@ -83,10 +92,6 @@ const CustomerHome = () => {
 
   const navigateToCreate = () => {
     navigation.navigate('creategig');
-  };
-
-  const navigateToLocationSelection = () => {
-    navigation.navigate('LocationSelection');
   };
 
   const handleDelete = async (blogId) => {
@@ -102,10 +107,10 @@ const CustomerHome = () => {
   const openMenu = (index) => setVisibleMenus(prevState => ({ ...prevState, [index]: true }));
   const closeMenu = (index) => setVisibleMenus(prevState => ({ ...prevState, [index]: false }));
 
-  const defaultProfileImage = 'https://www.example.com/default-profile.png'; // Replace with actual URL of your default image
+  const defaultProfileImage = 'https://www.example.com/default-profile.png';
 
   const tailorImages = [
-    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830544/slider/jp1ebbik8klez1dq3y7y.webp', // Replace with actual URLs of your images
+    'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830544/slider/jp1ebbik8klez1dq3y7y.webp',
     'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830545/slider/orzdveh8glctpartijt1.webp',
     'https://res.cloudinary.com/daybsp2pi/image/upload/v1717830543/slider/gmroyd8yerkri7corkmt.webp'
   ];
@@ -113,16 +118,7 @@ const CustomerHome = () => {
   return (
     <Provider>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.username}>{user.username}</Text>
-          </View>
-          <Image
-            source={{ uri: profileImage ? profileImage : defaultProfileImage }}
-            style={styles.profileImage}
-          />
-        </View>
-       
+
         <View style={styles.swiperContainer}>
           <Swiper style={styles.wrapper} showsButtons={false} autoplay={true} autoplayTimeout={3}>
             {tailorImages.map((image, index) => (
@@ -132,13 +128,12 @@ const CustomerHome = () => {
             ))}
           </Swiper>
         </View>
+
         <ScrollView style={styles.scrollView}>
           <View style={styles.popularItems}>
             {blogs.map((blog, index) => (
-                <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
-                
+              <TouchableOpacity key={index} style={styles.cardContainer} onPress={() => navigateToDetail(blog)}>
                 <Image source={{ uri: blog.photoPath }} style={styles.itemImage} />
-                
                 <View style={styles.cardDetail}>
                   <Text style={styles.itemTitle}>{blog.title}</Text>
                   <Text style={styles.itemPrice}>Rs. {blog.price}</Text>
@@ -147,6 +142,7 @@ const CustomerHome = () => {
             ))}
           </View>
         </ScrollView>
+
         <FAB
           style={styles.fab}
           icon="plus"
@@ -169,36 +165,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 30,
     backgroundColor: '#FF7F11',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 4,
   },
   username: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
-  location: {
-    fontSize: 16,
-    color: '#fff',
-    marginTop: 4,
-  },
-  txt:{
-    color: 'black',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-
   profileImage: {
     width: 50,
     height: 50,
     borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   swiperContainer: {
-    marginTop:8,
+    marginTop: 8,
     height: 250,
     backgroundColor: '#FF7F11',
     borderRadius: 10,
     overflow: 'hidden',
     marginHorizontal: 16,
     marginBottom: 16,
+    elevation: 3,
   },
   slide: {
     justifyContent: 'center',
@@ -228,11 +219,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 2,
+    elevation: 3,
     padding: 10,
+    transition: 'transform 0.3s ease',
   },
   cardDetail: {
-    
+    alignItems: 'center',
   },
   itemImage: {
     width: '100%',
@@ -244,13 +236,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-   
   },
   itemPrice: {
     marginTop: 6,
     color: '#FF7F11',
     fontWeight: 'bold',
-    alignItems: 'center',
   },
   fab: {
     position: 'absolute',
@@ -262,4 +252,3 @@ const styles = StyleSheet.create({
 });
 
 export default CustomerHome;
-

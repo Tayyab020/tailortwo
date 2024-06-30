@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, ToastAndroid, Platform } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getUserDetails, updateUserDetails } from '../api/internal';
 import { setUser } from '../store/userSlice';
@@ -11,8 +11,7 @@ const UserDetailsScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
-  const { userId } = route.params;
-
+  const loggedInUser = useSelector((state) => state.user);
   const [user, setUserState] = useState({});
   const [address, setAddress] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -21,7 +20,8 @@ const UserDetailsScreen = () => {
   const [editing, setEditing] = useState(false);
   const [showFromTimePicker, setShowFromTimePicker] = useState(false);
   const [showToTimePicker, setShowToTimePicker] = useState(false);
-
+  const { userId } = route.params;
+  
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -64,9 +64,6 @@ const UserDetailsScreen = () => {
       if (response.status === 200) {
         dispatch(setUser(updatedUser));
         await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
-        const jsonValue = await AsyncStorage.getItem('user');
-        const storedUserData = JSON.parse(jsonValue);
-        console.log("Async stored Successfully on Tab", storedUserData);
         ToastAndroid.show('Details updated successfully', ToastAndroid.SHORT);
         setEditing(false);
         navigation.navigate('Profile'); // Navigate to Profile screen
@@ -138,12 +135,11 @@ const UserDetailsScreen = () => {
             <Text style={styles.detail}>Address: {user.address}</Text>
             <Text style={styles.detail}>Phone Number: {user.phoneNumber}</Text>
             <Text style={styles.detail}>Availability: {user.availabilityTimeFrom} - {user.availabilityTimeTo}</Text>
-            {user._id === userId && (
+            {loggedInUser._id === user._id ? (
               <TouchableOpacity style={styles.button} onPress={() => setEditing(true)}>
                 <Text style={styles.buttonText}>Edit</Text>
               </TouchableOpacity>
-            )}
-            {user._id !== userId && (
+            ) : (
               <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
                 <Text style={styles.buttonText}>Close</Text>
               </TouchableOpacity>
